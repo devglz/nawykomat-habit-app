@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '215452038327',
     projectId: 'habbit-app-86883',
     authDomain: 'habbit-app-86883.firebaseapp.com',
-    storageBucket: 'habbit-app-86883.firebasestorage.app',
+    storageBucket: 'habbit-app-86883.appspot.com',
     measurementId: 'G-BFTQ37H71B',
   );
 
@@ -61,7 +61,7 @@ class DefaultFirebaseOptions {
     appId: '1:215452038327:android:c2ba5bea17f21b96bb4932',
     messagingSenderId: '215452038327',
     projectId: 'habbit-app-86883',
-    storageBucket: 'habbit-app-86883.firebasestorage.app',
+    storageBucket: 'habbit-app-86883.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -69,7 +69,7 @@ class DefaultFirebaseOptions {
     appId: '1:215452038327:ios:468565bd640ce8f4bb4932',
     messagingSenderId: '215452038327',
     projectId: 'habbit-app-86883',
-    storageBucket: 'habbit-app-86883.firebasestorage.app',
+    storageBucket: 'habbit-app-86883.appspot.com',
     iosBundleId: 'com.example.Nawykomat',
   );
 }

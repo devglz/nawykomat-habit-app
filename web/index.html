@@ -31,6 +31,25 @@
 
   <title>nawykomat</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase Configuration -->
+  <meta name="google-signin-client_id" content="656551468544-91p6giqjve1nq0u1okg89vce0v6cfmh8.apps.googleusercontent.com">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyBmfQjipbHP9K15gXHeN7RcFd6lkZCGpp0",
+      authDomain: "habbit-app-86883.firebaseapp.com",
+      projectId: "habbit-app-86883",
+      storageBucket: "habbit-app-86883.appspot.com",
+      messagingSenderId: "215452038327",
+      appId: "1:215452038327:web:a0de79bc5302e350bb4932",
+      measurementId: "G-BFTQ37H71B"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
