@@ -4,7 +4,11 @@ import 'package:habit_app/ui/splash/splash_page.dart';
 import 'package:habit_app/ui/login/login_page.dart';
 import 'package:habit_app/ui/register/register_page.dart';
 import 'package:habit_app/ui/home/home_page.dart';
+import 'package:habit_app/ui/habit/habit_page.dart';
+import 'package:habit_app/ui/habit/add_habit_page.dart';
+import 'package:habit_app/ui/habit/edit_habit_page.dart';
 import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,20 +18,20 @@ void main() async {
     );
     runApp(const MyApp());
   } catch (e) {
-    print('Błąd inicjalizacji Firebase: $e');
-    runApp(const ErrorApp());
+    runApp(ErrorApp(error: e.toString()));
   }
 }
 
 class ErrorApp extends StatelessWidget {
-  const ErrorApp({super.key});
+  final String error;
+  const ErrorApp({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Text('Błąd inicjalizacji aplikacji'),
+          child: Text('Błąd inicjalizacji: $error'),
         ),
       ),
     );
@@ -51,6 +55,19 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => const HomePage(),
+        '/habits': (context) => const HabitPage(),
+        '/addHabit': (context) => const AddHabitPage(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/editHabit') {
+          final habit = settings.arguments as DocumentSnapshot;
+          return MaterialPageRoute(
+            builder: (context) {
+              return EditHabitPage(habit: habit);
+            },
+          );
+        }
+        return null;
       },
     );
   }

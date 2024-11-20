@@ -20,6 +20,21 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
-        }
+        },
+        {
+        "name": "Flutter iOS",
+        "request": "launch",
+        "type": "dart",
+        "flutterMode": "debug",
+        "deviceId": "iphone",
+        "args": [
+          "--flavor",
+          "development"
+
     ]
-}
+
+
+      }
+    ]
+  }
+

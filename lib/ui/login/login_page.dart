@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:habit_app/ui/services/auth_service.dart';
+import 'package:habit_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,6 +13,66 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _errorMessage = '';
+
+  void _showError(String message) {
+    setState(() {
+      _errorMessage = message;
+    });
+  }
+
+  Future<void> _signInWithEmailAndPassword() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty) {
+      _showError('Proszę wprowadzić adres e-mail.');
+      return;
+    }
+
+    if (password.isEmpty) {
+      _showError('Proszę wprowadzić hasło.');
+      return;
+    }
+
+    try {
+      User? user = await AuthService().signInWithEmailAndPassword(email, password);
+      if (user != null) {
+        Navigator.pushNamed(context, '/home');
+      } else {
+        _showError('Nieprawidłowy e-mail lub hasło.');
+      }
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'invalid-email':
+          _showError('Nieprawidłowy adres e-mail.');
+          break;
+        case 'user-disabled':
+          _showError('Konto użytkownika zostało wyłączone.');
+          break;
+        case 'user-not-found':
+        case 'wrong-password':
+          _showError('Nieprawidłowy e-mail lub hasło.');
+          break;
+        default:
+          _showError('Wystąpił nieznany błąd: ${e.message}');
+      }
+    } catch (e) {
+      _showError('Wystąpił błąd: $e');
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      User? user = await AuthService().signInWithGoogle();
+      if (user != null) {
+        Navigator.pushNamed(context, '/home');
+      } else {
+        _showError('Nie udało się zalogować przez Google.');
+      }
+    } catch (e) {
+      _showError('Wystąpił błąd podczas logowania przez Google: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,22 +123,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () async {
-                  // Logika logowania
-                  try {
-                    User? user = await AuthService().signInWithEmailAndPassword(
-                      _emailController.text,
-                      _passwordController.text,
-                    );
-                    if (user != null) {
-                      Navigator.pushNamed(context, '/home');
-                    }
-                  } catch (e) {
-                    setState(() {
-                      _errorMessage = 'Failed to sign in: $e';
-                    });
-                  }
-                },
+                onPressed: _signInWithEmailAndPassword,
                 child: const Text('Zaloguj się'),
               ),
               if (_errorMessage.isNotEmpty)
@@ -100,17 +145,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
-                onPressed: () async {
-                  User? user = await AuthService().signInWithGoogle();
-                  if (user != null) {
-                    // Przejdź do ekranu głównego
-                    Navigator.pushNamed(context, '/home');
-                  } else {
-                    setState(() {
-                      _errorMessage = 'Failed to sign in with Google';
-                    });
-                  }
-                },
+                onPressed: _signInWithGoogle,
                 icon: Image.asset('assets/google_logo.png', height: 24.0),
                 label: const Text('Zaloguj się przez Google'),
                 style: ElevatedButton.styleFrom(
