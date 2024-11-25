@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:habit_app/services/habit_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:habit_app/services/habit_service.dart';
 
 class EditHabitPage extends StatefulWidget {
   final DocumentSnapshot habit;
