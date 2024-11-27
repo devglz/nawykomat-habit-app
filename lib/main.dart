@@ -5,11 +5,11 @@ import 'package:habit_app/ui/login/login_page.dart';
 import 'package:habit_app/ui/register/register_page.dart';
 import 'package:habit_app/ui/home/home_page.dart';
 import 'package:habit_app/ui/habit/add_habit_page.dart';
-import 'package:habit_app/ui/habit/edit_habit_page.dart';
-import 'package:habit_app/ui/progress/progress_page.dart'; // Upewnij się, że ten import jest dodany
+import 'package:habit_app/ui/progress/progress_page.dart';
+import 'package:habit_app/ui/news/news_page.dart';
+import 'package:habit_app/ui/settings/settings_page.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart'; // Import do obsługi kIsWeb
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,14 +42,16 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashPage(),
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-        '/home': (context) => const HomePage(),
-        '/addHabit': (context) => const AddHabitPage(),
-        '/progress': (context) => const ProgressPage(), // Dodaj tę trasę
-      },
+  routes: {
+  '/': (context) => const SplashPage(),
+  '/login': (context) => const LoginPage(),
+  '/register': (context) => const RegisterPage(),
+  '/home': (context) => const HomePage(),
+  '/addHabit': (context) => const AddHabitPage(),
+  '/progress': (context) => const ProgressPage(),
+  '/news': (context) => const NewsPage(),
+  '/settings': (context) => const SettingsPage(),
+},
     );
   }
 }
