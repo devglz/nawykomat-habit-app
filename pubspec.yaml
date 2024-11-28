@@ -39,6 +39,10 @@ flutter:
 
   assets:
     - assets/google_logo.png
+    - assets/images/jak-tworzyc-dobre-nawyki.jpg
+    - assets/images/zarzadzanie-czasem.jpg
+    - assets/images/motywacja-do-dzialania.jpg
+    - assets/images/zdrowe-nawyki-zywieniowe.jpg
 
   fonts:
     - family: Klasik

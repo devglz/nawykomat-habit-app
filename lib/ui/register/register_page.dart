@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habit_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Dodaj ten import
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,6 +14,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   String _errorMessage = '';
 
   void _showError(String message) {
@@ -21,10 +23,17 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
+  Future<void> saveUserName(String uid, String name) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'name': name,
+    });
+  }
+
   Future<void> _register() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
+    final name = _nameController.text.trim();
 
     if (email.isEmpty) {
       _showError('Proszę wprowadzić adres e-mail.');
@@ -49,6 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       User? user = await AuthService().registerWithEmailAndPassword(email, password);
       if (user != null) {
+        await saveUserName(user.uid, name); // Zapisz imię użytkownika
         Navigator.pushNamed(context, '/home');
       } else {
         _showError('Nie udało się zarejestrować.');
@@ -112,11 +122,17 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 20),
                       TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Imię',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      TextField(
                         controller: _emailController,
                         decoration: const InputDecoration(
                           labelText: 'Email',
-                          filled: true,
-                          fillColor: Colors.white,
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -125,8 +141,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _passwordController,
                         decoration: const InputDecoration(
                           labelText: 'Hasło',
-                          filled: true,
-                          fillColor: Colors.white,
                           border: OutlineInputBorder(),
                         ),
                         obscureText: true,
@@ -136,8 +150,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _confirmPasswordController,
                         decoration: const InputDecoration(
                           labelText: 'Potwierdź hasło',
-                          filled: true,
-                          fillColor: Colors.white,
                           border: OutlineInputBorder(),
                         ),
                         obscureText: true,
