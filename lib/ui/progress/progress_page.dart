@@ -10,6 +10,13 @@ class ProgressPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statystyki i postępy'),
+        backgroundColor: Color.fromARGB(255, 255, 253, 208), // Delikatny żółty kolor
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -31,9 +38,9 @@ class ProgressPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatisticCard('Dni z rzędu', '5'),
-                _buildStatisticCard('Ukończone nawyki', '12'),
-                _buildStatisticCard('Procent sukcesu', '80%'),
+                Expanded(child: _buildStatisticCard('Dni z rzędu', '5')),
+                Expanded(child: _buildStatisticCard('Ukończone nawyki', '12')),
+                Expanded(child: _buildStatisticCard('Procent sukcesu', '80%')),
               ],
             ),
             const SizedBox(height: 20),

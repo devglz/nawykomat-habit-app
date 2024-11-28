@@ -28,9 +28,26 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nawykomat'),
-      ),
+      appBar: _currentIndex == 0
+          ? AppBar(
+              title: const Text('Nawykomat'),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                },
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () async {
+                    await AuthService().signOut();
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                ),
+              ],
+            )
+          : null,
       body: _pages[_currentIndex], // Wyświetlanie odpowiedniej strony
       floatingActionButton: FloatingActionButton(
         onPressed: () {

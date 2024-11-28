@@ -62,12 +62,22 @@ class SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ustawienia'),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.yellowAccent,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -157,6 +167,16 @@ class SettingsPageState extends State<SettingsPage> {
                     final confirm = await _showConfirmationDialog(context, 'Czy na pewno chcesz usunąć swoje konto?');
                     if (confirm) {
                       await _deleteAccount();
+                    }
+                  },
+                ),
+                ListTile(
+                  title: const Text('Wyloguj się'),
+                  onTap: () async {
+                    final confirm = await _showConfirmationDialog(context, 'Czy na pewno chcesz się wylogować?');
+                    if (confirm) {
+                      await _signOut();
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                     }
                   },
                 ),

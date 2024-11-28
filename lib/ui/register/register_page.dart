@@ -166,15 +166,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         child: const Text('Zarejestruj się'),
                       ),
-                      if (_errorMessage.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Text(
-                            _errorMessage,
-                            style: const TextStyle(color: Colors.red, fontSize: 14),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
+                      const SizedBox(height: 15), // Dodaj ten odstęp
                       ElevatedButton.icon(
                         onPressed: () {},
                         icon: Image.asset('assets/google_logo.png', height: 20),
@@ -188,6 +180,15 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       ),
+                      if (_errorMessage.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red, fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       TextButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/login');
