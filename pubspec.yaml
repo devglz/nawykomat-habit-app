@@ -25,6 +25,7 @@ dependencies:
   shared_preferences: ^2.3.3
   flutter_facebook_auth: ^7.1.1
   fl_chart: 0.69.2
+  url_launcher: ^6.3.1
 
   web: ^1.0.0
   rename: ^3.0.2
@@ -39,6 +40,7 @@ flutter:
 
   assets:
     - assets/google_logo.png
+    - assets/app_logo.png
     - assets/images/jak-tworzyc-dobre-nawyki.jpg
     - assets/images/zarzadzanie-czasem.jpg
     - assets/images/motywacja-do-dzialania.jpg

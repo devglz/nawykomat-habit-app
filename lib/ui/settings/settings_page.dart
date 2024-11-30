@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'profile_page.dart';
 import 'personalization_page.dart'; // Dodaj ten import
 import './notifications_page.dart'; // Poprawiony import
+import 'support_pages.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -194,27 +195,51 @@ class SettingsPageState extends State<SettingsPage> {
                 const Divider(),
                 _buildSectionHeader('Wsparcie'),
                 ListTile(
+                  leading: const Icon(Icons.contact_support),
                   title: const Text('Kontakt'),
+                  subtitle: const Text('Skontaktuj się z naszym zespołem'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    // Umożliwia kontakt z obsługą techniczną
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ContactPage()),
+                    );
                   },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.feedback),
                   title: const Text('Opinie'),
+                  subtitle: const Text('Podziel się swoją opinią'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    // Pozwala na zgłaszanie opinii, sugestii lub problemów
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => FeedbackPage()),
+                    );
                   },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.privacy_tip),
                   title: const Text('Polityka prywatności'),
+                  subtitle: const Text('Informacje o ochronie danych'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    // Przejście do szczegółowych informacji o polityce prywatności
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PrivacyPolicyPage()),
+                    );
                   },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.info),
                   title: const Text('O aplikacji'),
+                  subtitle: const Text('Informacje i licencje'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    // Wyświetla informacje o aplikacji
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AboutAppPage()),
+                    );
                   },
                 ),
               ],
