@@ -8,9 +8,11 @@ import 'package:habit_app/ui/habit/add_habit_page.dart';
 import 'package:habit_app/ui/progress/progress_page.dart';
 import 'package:habit_app/ui/news/news_page.dart';
 import 'package:habit_app/ui/settings/settings_page.dart';
+import 'package:habit_app/ui/settings/personalization_page.dart';
+import 'package:habit_app/ui/settings/notifications_page.dart'; // Dodaj ten import
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart'; // Import do obsługi kIsWeb
-import 'package:habit_app/ui/settings/personalization_page.dart';
+
 
 
 void main() async {
@@ -54,7 +56,9 @@ class MyApp extends StatelessWidget {
   '/news': (context) => const NewsPage(),
   '/settings': (context) => const SettingsPage(),
   '/personalization': (context) => const PersonalizationPage(),
+  '/notifications': (context) => const NotificationsPage(),
 },
+
     );
   }
 }

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'profile_page.dart';
-import 'personalization_page.dart';
+import 'personalization_page.dart'; // Dodaj ten import
+import './notifications_page.dart'; // Poprawiony import
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -129,18 +130,26 @@ class SettingsPageState extends State<SettingsPage> {
                 ),
                 const Divider(),
                 _buildSectionHeader('Ogólne'),
-                SwitchListTile(
+                ListTile(
                   title: const Text('Powiadomienia'),
-                  value: true, // wartość powinna być pobrana z ustawień użytkownika
-                  onChanged: (bool value) {
-                    // Zarządzanie powiadomieniami
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationsPage(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
                   title: const Text('Więcej personalizacji'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    Navigator.pushNamed(context, '/personalization');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PersonalizationPage(),
+                      ),
+                    );
                   },
                 ),
                 const Divider(),
