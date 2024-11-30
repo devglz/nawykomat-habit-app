@@ -158,7 +158,7 @@ class _AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildIntervalTab() {
+  Widget _buildIntervalTab(StateSetter setState) { // Dodaj parametr setState
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -183,7 +183,7 @@ class _AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSt
                         ))
                     .toList(),
                 onChanged: (value) {
-                  setState(() {
+                  setState(() { // Użyj przekazanego setState
                     _intervalDays = value!;
                   });
                 },
@@ -293,7 +293,7 @@ class _AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSt
                           ),
                           Material(
                             color: Colors.white,
-                            child: _buildIntervalTab(),
+                            child: _buildIntervalTab(setDialogState), // Przekaż setDialogState
                           ),
                         ],
                       ),
@@ -317,8 +317,18 @@ class _AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSt
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white, // Dodaj kolor tekstu
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                           ),
-                          child: const Text('ZAPISZ'),
+                          child: const Text(
+                            'ZAPISZ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
