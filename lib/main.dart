@@ -10,6 +10,8 @@ import 'package:habit_app/ui/news/news_page.dart';
 import 'package:habit_app/ui/settings/settings_page.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart'; // Import do obsługi kIsWeb
+import 'package:habit_app/ui/settings/personalization_page.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +53,7 @@ class MyApp extends StatelessWidget {
   '/progress': (context) => const ProgressPage(),
   '/news': (context) => const NewsPage(),
   '/settings': (context) => const SettingsPage(),
+  '/personalization': (context) => const PersonalizationPage(),
 },
     );
   }
