@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:habit_app/ui/widgets/custom_bottom_navigation_bar.dart';
-import 'package:habit_app/services/auth_service.dart';
 import 'package:habit_app/services/habit_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:habit_app/ui/news/news_page.dart';
@@ -17,12 +16,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  // Lista widgetów/stron dla każdej zakładki
+  // Przywracamy oryginalne strony dla dolnej nawigacji
   final List<Widget> _pages = [
-    const HomeContent(), // Główna zawartość strony
-    const NewsPage(),    // Strona z aktualnościami
-    const ProgressPage(), // Strona ze statystykami
-    const SettingsPage(), // Strona z ustawieniami
+    const HomePageContent(),  // Nowa główna strona z zakładkami
+    const NewsPage(),
+    const ProgressPage(),
+    const SettingsPage(),
   ];
 
   @override
@@ -33,13 +32,11 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/addHabit');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/addHabit'),
           ),
         ],
       ),
-      body: _pages[_currentIndex],  // Wyświetlanie odpowiedniej strony
+      body: _pages[_currentIndex],
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -52,18 +49,69 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomeContent extends StatelessWidget {
-  const HomeContent({super.key});
+class HomePageContent extends StatelessWidget {
+  const HomePageContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 4,
+      child: Column(
+        children: [
+          const TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(text: 'Wszystkie'),
+              Tab(text: 'Poranek'),
+              Tab(text: 'Południe'),
+              Tab(text: 'Wieczór'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                DayAreaPage(dayArea: 'all'),
+                DayAreaPage(dayArea: 'PORANEK'),
+                DayAreaPage(dayArea: 'POŁUDNIE'),
+                DayAreaPage(dayArea: 'WIECZÓR'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DayAreaPage extends StatelessWidget {
+  final String dayArea;
+  const DayAreaPage({required this.dayArea, super.key});
+
+  String _getSectionTitle(bool isActive) {
+    if (isActive) {
+      return 'Aktywne nawyki ${_getDayAreaText()}';
+    }
+    return 'Ukończone nawyki ${_getDayAreaText()}';
+  }
+
+  String _getDayAreaText() {
+    switch (dayArea) {
+      case 'PORANEK': return '(poranne)';
+      case 'POŁUDNIE': return '(południowe)';
+      case 'WIECZÓR': return '(wieczorne)';
+      default: return '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          SectionTitle(title: 'Nawyki aktywne'),
-          HabitList(isCompleted: false),  // Aktywne nawyki
-          SectionTitle(title: 'Nawyki ukończone'),
-          HabitList(isCompleted: true),   // Ukończone nawyki
+          SectionTitle(title: _getSectionTitle(true)),
+          HabitList(isCompleted: false, dayArea: dayArea),
+          SectionTitle(title: _getSectionTitle(false)),
+          HabitList(isCompleted: true, dayArea: dayArea),
         ],
       ),
     );
@@ -89,52 +137,79 @@ class SectionTitle extends StatelessWidget {
 
 class HabitList extends StatelessWidget {
   final bool isCompleted;
+  final String dayArea;
 
-  const HabitList({required this.isCompleted, super.key});
+  const HabitList({
+    required this.isCompleted,
+    required this.dayArea,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: HabitService().getHabits(),
+      stream: HabitService().getHabits(),  // Używamy podstawowej metody getHabits
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          print('Error: ${snapshot.error}');  // Debugowanie błędów
+          return const Center(
+            child: Text('Wystąpił błąd podczas ładowania nawyków'),
+          );
+        }
+
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // Filtrujemy nawyki na podstawie statusu isCompleted
-        final habits = snapshot.data!.docs
-            .where((doc) => doc['isCompleted'] == isCompleted)
-            .toList();
+        // Debugowanie otrzymanych danych
+        print('Total habits: ${snapshot.data!.docs.length}');
+
+        final habits = snapshot.data!.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final habitIsCompleted = data['isCompleted'] ?? false;
+          final habitDayArea = data['dayArea'] ?? '';
+          
+          // Debugowanie wartości dla każdego nawyku
+          print('Habit: ${data['name']}, dayArea: $habitDayArea, isCompleted: $habitIsCompleted');
+          
+          if (dayArea == 'all') {
+            return habitIsCompleted == isCompleted;
+          }
+          return habitIsCompleted == isCompleted && habitDayArea == dayArea;
+        }).toList();
+
+        // Debugowanie przefiltrowanych nawyków
+        print('Filtered habits for $dayArea (isCompleted: $isCompleted): ${habits.length}');
 
         if (habits.isEmpty) {
-          return const Center(child: Text('Brak nawyków'));
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                isCompleted ? 'Brak ukończonych nawyków' : 'Brak aktywnych nawyków',
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            ),
+          );
         }
 
         return ListView.builder(
-          shrinkWrap: true,  // Zapewnia, że lista jest ograniczona do wysokości dostępnego obszaru
-          physics: const NeverScrollableScrollPhysics(),  // Wyłączamy przewijanie w obrębie tej listy
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: habits.length,
           itemBuilder: (context, index) {
             final habit = habits[index];
             final data = habit.data() as Map<String, dynamic>;
-            final habitId = habit.id;  // Pobieranie ID nawyku
-            final title = data['name'] ?? '';
-            final description = data['description'] ?? '';
-            final progress = data['progress'] ?? 0;
-            final isCompleted = data['isCompleted'] ?? false;
-            final startDate = data['startDate'] as Timestamp;
-            final dayArea = data['dayArea'] ?? 'Unknown';
-            final reminders = List<String>.from(data['reminders'] ?? []);
-
+            
             return HabitCard(
-              habitId: habitId,
-              title: title,
-              description: description,
-              progress: progress,
-              isCompleted: isCompleted,
-              startDate: startDate,
-              dayArea: dayArea,
-              reminders: reminders,
+              habitId: habit.id,
+              title: data['name'] ?? '',
+              description: data['description'] ?? '',
+              progress: data['progress'] ?? 0,
+              isCompleted: data['isCompleted'] ?? false,
+              startDate: data['startDate'] as Timestamp,
+              dayArea: data['dayArea'] ?? 'Unknown',
+              reminders: List<String>.from(data['reminders'] ?? []),
             );
           },
         );
