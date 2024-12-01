@@ -124,7 +124,7 @@ class SettingsPageState extends State<SettingsPage> {
                             MaterialPageRoute(builder: (context) => ProfilePage(userData: userData)),
                           );
                         },
-                        child: const Text('View'),
+                        child: const Text('Zobacz'),
                       ),
                     );
                   },

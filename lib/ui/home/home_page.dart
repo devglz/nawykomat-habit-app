@@ -148,10 +148,10 @@ class HabitList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: HabitService().getHabits(),  // Używamy podstawowej metody getHabits
+      stream: HabitService().getHabits(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          print('Error: ${snapshot.error}');  // Debugowanie błędów
+          print('Error: ${snapshot.error}');
           return const Center(
             child: Text('Wystąpił błąd podczas ładowania nawyków'),
           );
@@ -161,7 +161,6 @@ class HabitList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // Debugowanie otrzymanych danych
         print('Total habits: ${snapshot.data!.docs.length}');
 
         final habits = snapshot.data!.docs.where((doc) {
@@ -169,7 +168,6 @@ class HabitList extends StatelessWidget {
           final habitIsCompleted = data['isCompleted'] ?? false;
           final habitDayArea = data['dayArea'] ?? '';
           
-          // Debugowanie wartości dla każdego nawyku
           print('Habit: ${data['name']}, dayArea: $habitDayArea, isCompleted: $habitIsCompleted');
           
           if (dayArea == 'all') {
@@ -178,7 +176,6 @@ class HabitList extends StatelessWidget {
           return habitIsCompleted == isCompleted && habitDayArea == dayArea;
         }).toList();
 
-        // Debugowanie przefiltrowanych nawyków
         print('Filtered habits for $dayArea (isCompleted: $isCompleted): ${habits.length}');
 
         if (habits.isEmpty) {
@@ -200,6 +197,8 @@ class HabitList extends StatelessWidget {
           itemBuilder: (context, index) {
             final habit = habits[index];
             final data = habit.data() as Map<String, dynamic>;
+            
+            print('Building HabitCard with ID: ${habit.id}');
             
             return HabitCard(
               habitId: habit.id,
@@ -242,17 +241,44 @@ class HabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Rendering HabitCard: $habitId');
+    
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: ListTile(
         title: Text(title),
         subtitle: Text(description),
-        trailing: Icon(
-          isCompleted ? Icons.check_circle : Icons.circle,
-          color: isCompleted ? Colors.green : Colors.grey,
+        trailing: IconButton(
+          icon: Icon(
+            isCompleted ? Icons.check_circle : Icons.circle_outlined,
+            color: isCompleted ? Colors.green : Colors.grey,
+            size: 30,
+          ),
+          onPressed: () async {
+            print('Toggling habit: $habitId');
+            try {
+              await HabitService().toggleHabitCompletion(habitId, isCompleted);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            } catch (e) {
+              print('Error in HabitCard toggle: $e');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Błąd: ${e.toString()}'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          },
         ),
         onTap: () {
-          // Logika dla otwierania szczegółów nawyku (np. edytowanie lub szczegóły)
           Navigator.pushNamed(context, '/habitDetail', arguments: habitId);
         },
       ),

@@ -1,90 +1,154 @@
-// lib/ui/progress/progress_page.dart
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart'; // Dodajemy bibliotekę do wykresów
+import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:habit_app/services/habit_service.dart';
+
+
+
+class ProgressPageState extends ChangeNotifier {
+  final HabitService _habitService;
+  int activeHabits = 0;
+  int completedHabits = 0;
+  int longestStreak = 0;
+  double successRate = 0.0;
+  Map<int, int> completionsByDay = {};
+  int mostActiveDay = 1;
+  List<FlSpot> weeklyProgress = [];
+
+  ProgressPageState(this._habitService) {
+    _loadStatistics();
+  }
+
+  Future<void> _loadStatistics() async {
+    try {
+      // Pobierz dane asynchronicznie
+      final activeHabitsCount = await _habitService.getActiveHabitsCount();
+      final completions = await _habitService.getAllCompletions();
+
+      // Aktualizuj stan
+      activeHabits = activeHabitsCount;
+      completedHabits = completions.length;
+
+      // Oblicz procent sukcesu
+      if (activeHabits > 0) {
+        successRate = (completedHabits / (activeHabits * 7)) * 100;
+      }
+
+      // Oblicz statystyki dzienne
+      Map<DateTime, int> dailyCompletions = {};
+      for (var completion in completions) {
+        final data = completion.data() as Map<String, dynamic>;
+        final date = (data['updatedAt'] as Timestamp).toDate();
+        dailyCompletions[date] = (dailyCompletions[date] ?? 0) + 1;
+        completionsByDay[date.weekday] = (completionsByDay[date.weekday] ?? 0) + 1;
+      }
+
+      // Znajdź najbardziej aktywny dzień
+      int maxCompletions = 0;
+      completionsByDay.forEach((day, count) {
+        if (count > maxCompletions) {
+          maxCompletions = count;
+          mostActiveDay = day;
+        }
+      });
+
+      // Oblicz postęp tygodniowy
+      weeklyProgress.clear();
+      final now = DateTime.now();
+      for (int i = 6; i >= 0; i--) {
+        final date = now.subtract(Duration(days: i));
+        final completionsCount = dailyCompletions[date] ?? 0;
+        weeklyProgress.add(FlSpot(6-i.toDouble(), completionsCount.toDouble()));
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error loading statistics: $e');
+    }
+  }
+
+  String getMostActiveDayName() {
+    switch (mostActiveDay) {
+      case 1: return 'Poniedziałek';
+      case 2: return 'Wtorek';
+      case 3: return 'Środa';
+      case 4: return 'Czwartek';
+      case 5: return 'Piątek';
+      case 6: return 'Sobota';
+      case 7: return 'Niedziela';
+      default: return '';
+    }
+  }
+}
 
 class ProgressPage extends StatelessWidget {
   const ProgressPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Statystyki i postępy'),
-        backgroundColor: Color.fromARGB(255, 255, 253, 208), // Delikatny żółty kolor
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Twoje postępy',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return ChangeNotifierProvider(
+      create: (_) => ProgressPageState(context.read<HabitService>()),
+      child: Consumer<ProgressPageState>(
+        builder: (context, state, _) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Statystyki i postępy'),
+              backgroundColor: Color.fromARGB(255, 255, 253, 208),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                },
+              ),
             ),
-            const SizedBox(height: 20),
-            _buildLineChart(),
-            const SizedBox(height: 20),
-            const Text(
-              'Statystyki',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Podsumowanie ogólne',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(child: _buildStatisticCard('Aktywne nawyki', state.activeHabits.toString())),
+                      Expanded(child: _buildStatisticCard('Ukończone zadania', state.completedHabits.toString())),
+                      Expanded(child: _buildStatisticCard('Procent sukcesu', '${state.successRate.toStringAsFixed(1)}%')),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Postęp tygodniowy',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildLineChart(state.weeklyProgress),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Najbardziej aktywny dzień: ${state.getMostActiveDayName()}',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(child: _buildStatisticCard('Dni z rzędu', '5')),
-                Expanded(child: _buildStatisticCard('Ukończone nawyki', '12')),
-                Expanded(child: _buildStatisticCard('Procent sukcesu', '80%')),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Szczegółowe dane',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _buildBarChart(),
-            const SizedBox(height: 20),
-            const Text(
-              'Ostatnie aktywności',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _buildRecentActivities(),
-            const SizedBox(height: 20),
-            const Text(
-              'Cele na przyszłość',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _buildFutureGoals(),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildLineChart() {
+  Widget _buildLineChart(List<FlSpot> spots) {
     return SizedBox(
       height: 200,
       child: LineChart(
         LineChartData(
           lineBarsData: [
             LineChartBarData(
-              spots: [
-                FlSpot(0, 1),
-                FlSpot(1, 3),
-                FlSpot(2, 2),
-                FlSpot(3, 5),
-                FlSpot(4, 3),
-                FlSpot(5, 4),
-              ],
+              spots: spots,
               isCurved: true,
               color: Colors.blue,
               barWidth: 4,
@@ -93,29 +157,16 @@ class ProgressPage extends StatelessWidget {
           ],
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-            bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBarChart() {
-    return SizedBox(
-      height: 200,
-      child: BarChart(
-        BarChartData(
-          barGroups: [
-            BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 8, color: Colors.lightBlueAccent)]),
-            BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 10, color: Colors.lightBlueAccent)]),
-            BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 14, color: Colors.lightBlueAccent)]),
-            BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 15, color: Colors.lightBlueAccent)]),
-            BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 13, color: Colors.lightBlueAccent)]),
-            BarChartGroupData(x: 5, barRods: [BarChartRodData(toY: 10, color: Colors.lightBlueAccent)]),
-          ],
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-            bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+            bottomTitles: AxisTitles(sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                const days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'];
+                if (value >= 0 && value < days.length) {
+                  return Text(days[value.toInt()]);
+                }
+                return const Text('');
+              },
+            )),
           ),
         ),
       ),
@@ -142,30 +193,6 @@ class ProgressPage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildRecentActivities() {
-    return Column(
-      children: List.generate(5, (index) {
-        return ListTile(
-          leading: Icon(Icons.check_circle, color: Colors.green),
-          title: Text('Aktywność ${index + 1}'),
-          subtitle: Text('Opis aktywności ${index + 1}'),
-        );
-      }),
-    );
-  }
-
-  Widget _buildFutureGoals() {
-    return Column(
-      children: List.generate(3, (index) {
-        return ListTile(
-          leading: Icon(Icons.flag, color: Colors.blue),
-          title: Text('Cel ${index + 1}'),
-          subtitle: Text('Opis celu ${index + 1}'),
-        );
-      }),
     );
   }
 }

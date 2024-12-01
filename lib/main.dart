@@ -12,8 +12,8 @@ import 'package:habit_app/ui/settings/personalization_page.dart';
 import 'package:habit_app/ui/settings/notifications_page.dart'; // Dodaj ten import
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart'; // Import do obsługi kIsWeb
-
-
+import 'package:provider/provider.dart';
+import 'package:habit_app/services/habit_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +31,17 @@ void main() async {
     );
   }
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<HabitService>(
+          create: (_) => HabitService(),
+        ),
+        // ...other providers if any...
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

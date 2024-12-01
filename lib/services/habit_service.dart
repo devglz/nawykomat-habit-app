@@ -66,4 +66,65 @@ class HabitService {
         .where('dayArea', isEqualTo: dayArea)
         .snapshots();
   }
+
+  Future<void> toggleHabitCompletion(String habitId, bool currentStatus) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Użytkownik nie jest zalogowany');
+    }
+
+    try {
+      print('Trying to toggle habit: $habitId'); // Debug log
+      
+      final habitRef = _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .doc(habitId);
+
+      // Sprawdź czy dokument istnieje
+      final doc = await habitRef.get();
+      if (!doc.exists) {
+        print('Habit document not found: $habitId'); // Debug log
+        throw Exception('Nawyk nie istnieje');
+      }
+
+      await habitRef.update({
+        'isCompleted': !currentStatus,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      
+      print('Successfully toggled habit completion: $habitId'); // Debug log
+    } catch (e) {
+      print('Error toggling habit completion: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<DocumentSnapshot>> getAllCompletions() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final habitsSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .where('isCompleted', isEqualTo: true)
+          .get();
+      return habitsSnapshot.docs;
+    }
+    return [];
+  }
+
+  Future<int> getActiveHabitsCount() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final habitsSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .get();
+      return habitsSnapshot.docs.length;
+    }
+    return 0;
+  }
 }
