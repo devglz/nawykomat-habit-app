@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart'; // Dodano import
+import 'package:flutter/material.dart';
 
 class HabitService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -8,67 +8,79 @@ class HabitService {
 
   Future<void> addHabit(
     String name,
-    String title, // zostawiamy parametry ale nie używamy ich w bazie
-    String description,
     int progress,
     Timestamp startDate,
     bool isCompleted,
-    String repeatCycle,
-    String goal,
     String timeOfDay,
     String dayArea,
-    List<TimeOfDay?> reminders, // Lista nullable TimeOfDay
+    List<String> reminders,
+    List<int> selectedDays,
   ) async {
     final user = _auth.currentUser;
     if (user != null) {
       await _firestore.collection('users').doc(user.uid).collection('habits').add({
         'name': name,
-        'startDate': startDate,
-        'isCompleted': isCompleted,
-        'repeatCycle': repeatCycle,
-        'goal': goal,
-        'timeOfDay': timeOfDay,
-        'dayArea': dayArea,
-        'reminders': reminders
-            .where((reminder) => reminder != null) // Filtruj null
-            .map((reminder) => '${reminder!.hour}:${reminder.minute}')
-            .toList(),
-      });
-    }
-  }
-
-  Future<void> updateHabit(
-    String habitId,
-    String title,
-    String description,
-    int progress,
-    Timestamp startDate,
-    bool isCompleted,
-  ) async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      await _firestore.collection('users').doc(user.uid).collection('habits').doc(habitId).update({
-        'title': title,
-        'description': description,
         'progress': progress,
         'startDate': startDate,
         'isCompleted': isCompleted,
+        'timeOfDay': timeOfDay,
+        'dayArea': dayArea,
+        'reminders': reminders,
+        'selectedDays': selectedDays,
+        'createdAt': Timestamp.now(),
       });
     }
   }
 
-  Future<void> deleteHabit(String habitId) async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      await _firestore.collection('users').doc(user.uid).collection('habits').doc(habitId).delete();
+ Future<void> updateHabit(
+  String habitId,
+  int progress,
+  Timestamp startDate,
+  bool isCompleted,
+  List<int> selectedDays,  // Zmiana typu argumentu na List<int>
+) async {
+  final user = _auth.currentUser;
+  if (user != null) {
+    try {
+      // Aktualizacja dokumentu nawyku w Firestore
+      await _firestore.collection('users').doc(user.uid).collection('habits').doc(habitId).update({
+        'progress': progress,          // Aktualizacja postępu
+        'startDate': startDate,        // Aktualizacja daty rozpoczęcia
+        'isCompleted': isCompleted,    // Aktualizacja statusu ukończenia
+        'selectedDays': selectedDays,  // Zaktualizowanie listy dni
+      });
+    } catch (e) {
+      // Obsługa błędów (np. jeśli dokument nie istnieje)
+      print('Error updating habit: $e');
     }
   }
+}
 
-  Stream<QuerySnapshot> getHabits() {
+ Future<void> deleteHabit(String habitId) async {
+  final user = _auth.currentUser;
+  if (user != null) {
+    try {
+      // Usunięcie dokumentu nawyku
+      await _firestore.collection('users').doc(user.uid).collection('habits').doc(habitId).delete();
+    } catch (e) {
+      // Obsługa błędów (np. jeśli dokument nie istnieje)
+      print('Error deleting habit: $e');
+    }
+  }
+}
+
+
+   Stream<QuerySnapshot> getHabits() {
     final user = _auth.currentUser;
     if (user != null) {
-      return _firestore.collection('users').doc(user.uid).collection('habits').orderBy('createdAt').snapshots();
+      // Sprawdzamy, czy użytkownik jest zalogowany
+      return _firestore
+          .collection('users') // Kolekcja użytkowników
+          .doc(user.uid) // Dokument konkretnego użytkownika (po uid)
+          .collection('habits') // Kolekcja nawyków
+          .orderBy('createdAt') // Sortowanie po dacie utworzenia
+          .snapshots(); // Odczyt na żywo - stream
     }
-    return const Stream.empty();
+    return const Stream.empty(); // Jeśli użytkownik nie jest zalogowany, zwracamy pusty stream
   }
 }

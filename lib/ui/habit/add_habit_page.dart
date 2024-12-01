@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:habit_app/services/habit_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-// Add Habit Page
 class AddHabitPage extends StatefulWidget {
   const AddHabitPage({super.key});
 
   @override
-  _AddHabitPageState createState() => _AddHabitPageState();
+  AddHabitPageState createState() => AddHabitPageState();
 }
 
-class _AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderStateMixin {
+class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderStateMixin {
   final TextEditingController _nameController = TextEditingController();
-  bool _isCompleted = false;
+  final bool _isCompleted = false;
   String _errorMessage = '';
   Timestamp? _startDate;
-  String _goal = '1 raz dziennie';
-  String _timeOfDay = 'Kiedykolwiek';
-  String _dayArea = 'PORANEK'; // Changed initial value
-  List<TimeOfDay> _reminders = [];
+  String _dayArea = 'PORANEK';
+  final List<TimeOfDay> _reminders = [];
   late TabController _tabController;
   final List<bool> _selectedDays = List.generate(7, (index) => true);
   final List<bool> _selectedMonthDays = List.generate(31, (index) => false);
   int _intervalDays = 1;
   final List<String> _weekDays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
+  final TimeOfDay _timeOfDay = TimeOfDay.now();
 
   @override
   void initState() {
@@ -38,37 +35,34 @@ class _AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSt
     super.dispose();
   }
 
-  void _showError(String message) {
-    setState(() {
-      _errorMessage = message;
-    });
-  }
-
   Future<void> _addHabit() async {
-    final name = _nameController.text.trim();
-
-    if (name.isEmpty) {
-      _showError('Proszę wprowadzić nazwę.');
-      return;
-    }
-
     try {
+      List<int> selectedDays = [];
+      for (int i = 0; i < _selectedDays.length; i++) {
+        if (_selectedDays[i]) {
+          selectedDays.add(i);
+        }
+      }
+
+      List<String> reminders = _reminders.map((reminder) => '${reminder.hour}:${reminder.minute}').toList();
+
       await HabitService().addHabit(
-        name,
-        '', // title
-        '', // description
-        0, // progress
+        _nameController.text,
+        0,
         _startDate ?? Timestamp.now(),
         _isCompleted,
-        '', // _repeatCycle removed
-        _goal,
-        _timeOfDay,
+        '${_timeOfDay.hour}:${_timeOfDay.minute}',
         _dayArea,
-        _reminders
+        reminders,
+        selectedDays,
       );
+
+      if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
-      _showError('Wystąpił błąd: $e');
+      setState(() {
+        _errorMessage = e.toString();
+      });
     }
   }
 
@@ -89,37 +83,38 @@ class _AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSt
   }
 
   Widget _buildDailyTab(StateSetter setState) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Wybierz dni tygodnia',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: List.generate(7, (index) {
-              return FilterChip(
-                label: Text(_weekDays[index]),
-                selected: _selectedDays[index],
-                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                checkmarkColor: Theme.of(context).primaryColor,
-                onSelected: (bool selected) {
-                  setState(() {
-                    _selectedDays[index] = selected;
-                  });
-                },
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Wybierz dni tygodnia',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: List.generate(7, (index) {
+            return FilterChip(
+              label: Text(_weekDays[index]),
+              selected: _selectedDays[index], // Sprawdzamy, czy dany dzień jest zaznaczony
+              selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+              checkmarkColor: Theme.of(context).primaryColor,
+              onSelected: (bool selected) {
+                setState(() {
+                  _selectedDays[index] = selected; // Zmiana stanu zaznaczenia dnia
+                });
+              },
+            );
+          }),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildMonthlyTab(StateSetter setState) {
     return Padding(

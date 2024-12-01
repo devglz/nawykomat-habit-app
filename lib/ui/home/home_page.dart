@@ -28,33 +28,18 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _currentIndex == 0
-          ? AppBar(
-              title: const Text('Nawykomat'),
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-                },
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () async {
-                    await AuthService().signOut();
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
-                ),
-              ],
-            )
-          : null,
-      body: _pages[_currentIndex], // Wyświetlanie odpowiedniej strony
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/addHabit');
-        },
-        child: const Icon(Icons.add),
+      appBar: AppBar(
+        title: const Text('Nawykomat'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/addHabit');
+            },
+          ),
+        ],
       ),
+      body: _pages[_currentIndex],  // Wyświetlanie odpowiedniej strony
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -67,165 +52,135 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Dodaj ten widget jako osobną klasę
 class HomeContent extends StatelessWidget {
   const HomeContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SectionTitle(title: 'Nawyki aktywne'),
+          HabitList(isCompleted: false),  // Aktywne nawyki
+          SectionTitle(title: 'Nawyki ukończone'),
+          HabitList(isCompleted: true),   // Ukończone nawyki
+        ],
+      ),
+    );
+  }
+}
+
+class SectionTitle extends StatelessWidget {
+  final String title;
+
+  const SectionTitle({required this.title, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
+class HabitList extends StatelessWidget {
+  final bool isCompleted;
+
+  const HabitList({required this.isCompleted, super.key});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: HabitService().getHabits(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError) {
-          return const Center(child: Text('Wystąpił błąd'));
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+
+        // Filtrujemy nawyki na podstawie statusu isCompleted
+        final habits = snapshot.data!.docs
+            .where((doc) => doc['isCompleted'] == isCompleted)
+            .toList();
+
+        if (habits.isEmpty) {
           return const Center(child: Text('Brak nawyków'));
         }
 
-        final habits = snapshot.data!.docs;
-        final activeHabits = habits.where((habit) => !(habit.data() as Map<String, dynamic>)['isCompleted']).toList();
-        final completedHabits = habits.where((habit) => (habit.data() as Map<String, dynamic>)['isCompleted']).toList();
+        return ListView.builder(
+          shrinkWrap: true,  // Zapewnia, że lista jest ograniczona do wysokości dostępnego obszaru
+          physics: const NeverScrollableScrollPhysics(),  // Wyłączamy przewijanie w obrębie tej listy
+          itemCount: habits.length,
+          itemBuilder: (context, index) {
+            final habit = habits[index];
+            final data = habit.data() as Map<String, dynamic>;
+            final habitId = habit.id;  // Pobieranie ID nawyku
+            final title = data['name'] ?? '';
+            final description = data['description'] ?? '';
+            final progress = data['progress'] ?? 0;
+            final isCompleted = data['isCompleted'] ?? false;
+            final startDate = data['startDate'] as Timestamp;
+            final dayArea = data['dayArea'] ?? 'Unknown';
+            final reminders = List<String>.from(data['reminders'] ?? []);
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Twoje Nawyki',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        const Text(
-                          'Aktywne Nawyki',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        ...activeHabits.map((habit) {
-                          final data = habit.data() as Map<String, dynamic>;
-                          final title = data['title'];
-                          final description = data['description'];
-                          final progress = data['progress'] ?? 0;
-                          final isCompleted = data['isCompleted'] ?? false;
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: ListTile(
-                              title: Text(title),
-                              subtitle: Text('Opis: $description, Postęp: $progress dni'),
-                              trailing: Wrap(
-                                spacing: 12,
-                                children: [
-                                  Checkbox(
-                                    value: isCompleted,
-                                    onChanged: (bool? value) async {
-                                      await HabitService().updateHabit(
-                                        habit.id,
-                                        title,
-                                        description,
-                                        progress + (value == true ? 1 : -1),
-                                        data['startDate'],
-                                        value ?? false,
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    onPressed: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/editHabit',
-                                        arguments: habit,
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () async {
-                                      await HabitService().deleteHabit(habit.id);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Zrobione Nawyki',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        ...completedHabits.map((habit) {
-                          final data = habit.data() as Map<String, dynamic>;
-                          final title = data['title'];
-                          final description = data['description'];
-                          final progress = data['progress'] ?? 0;
-                          final isCompleted = data['isCompleted'] ?? false;
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: ListTile(
-                              title: Text(
-                                title,
-                                style: const TextStyle(decoration: TextDecoration.lineThrough),
-                              ),
-                              subtitle: Text('Opis: $description, Postęp: $progress dni'),
-                              trailing: Wrap(
-                                spacing: 12,
-                                children: [
-                                  Checkbox(
-                                    value: isCompleted,
-                                    onChanged: (bool? value) async {
-                                      await HabitService().updateHabit(
-                                        habit.id,
-                                        title,
-                                        description,
-                                        progress + (value == true ? 1 : -1),
-                                        data['startDate'],
-                                        value ?? false,
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    onPressed: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/editHabit',
-                                        arguments: habit,
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () async {
-                                      await HabitService().deleteHabit(habit.id);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            return HabitCard(
+              habitId: habitId,
+              title: title,
+              description: description,
+              progress: progress,
+              isCompleted: isCompleted,
+              startDate: startDate,
+              dayArea: dayArea,
+              reminders: reminders,
             );
           },
         );
       },
+    );
+  }
+}
+
+class HabitCard extends StatelessWidget {
+  final String habitId;
+  final String title;
+  final String description;
+  final int progress;
+  final bool isCompleted;
+  final Timestamp startDate;
+  final String dayArea;
+  final List<String> reminders;
+
+  const HabitCard({
+    required this.habitId,
+    required this.title,
+    required this.description,
+    required this.progress,
+    required this.isCompleted,
+    required this.startDate,
+    required this.dayArea,
+    required this.reminders,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      child: ListTile(
+        title: Text(title),
+        subtitle: Text(description),
+        trailing: Icon(
+          isCompleted ? Icons.check_circle : Icons.circle,
+          color: isCompleted ? Colors.green : Colors.grey,
+        ),
+        onTap: () {
+          // Logika dla otwierania szczegółów nawyku (np. edytowanie lub szczegóły)
+          Navigator.pushNamed(context, '/habitDetail', arguments: habitId);
+        },
+      ),
     );
   }
 }

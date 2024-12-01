@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactPage extends StatelessWidget {
+  const ContactPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +90,8 @@ class ContactPage extends StatelessWidget {
 }
 
 class FeedbackPage extends StatefulWidget {
+  const FeedbackPage({super.key});
+
   @override
   _FeedbackPageState createState() => _FeedbackPageState();
 }
@@ -175,6 +179,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
 }
 
 class PrivacyPolicyPage extends StatelessWidget {
+  const PrivacyPolicyPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -215,6 +221,8 @@ class PrivacyPolicyPage extends StatelessWidget {
 }
 
 class AboutAppPage extends StatelessWidget {
+  const AboutAppPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
