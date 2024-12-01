@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 
 class ContactPage extends StatelessWidget {
   const ContactPage({super.key});
@@ -196,26 +198,99 @@ class PrivacyPolicyPage extends StatelessWidget {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 20),
-          Text(
-            '1. Gromadzenie danych',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          _PolicySection(
+            title: '1. Wstęp',
+            content: 'Niniejsza Polityka Prywatności określa zasady przetwarzania i ochrony danych osobowych użytkowników aplikacji Nawykomat. Szanujemy Twoją prywatność i zobowiązujemy się do ochrony Twoich danych osobowych.',
           ),
-          SizedBox(height: 10),
-          Text(
-            'Zbieramy tylko niezbędne dane potrzebne do funkcjonowania aplikacji...',
+          _PolicySection(
+            title: '2. Administrator Danych',
+            content: 'Administratorem Twoich danych osobowych jest Nawykomat Sp. z o.o. z siedzibą w Warszawie, ul. Przykładowa 1, 00-001 Warszawa.',
           ),
-          SizedBox(height: 20),
-          Text(
-            '2. Wykorzystanie danych',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          _PolicySection(
+            title: '3. Gromadzone Dane',
+            content: '''Gromadzimy następujące kategorie danych:
+• Dane podstawowe (imię, adres email)
+• Dane o użytkowaniu aplikacji
+• Dane o postępach w realizacji nawyków
+• Dane techniczne urządzenia''',
           ),
-          SizedBox(height: 10),
-          Text(
-            'Twoje dane są wykorzystywane wyłącznie w celu...',
+          _PolicySection(
+            title: '4. Cel Przetwarzania Danych',
+            content: '''Twoje dane są przetwarzane w celu:
+• Świadczenia usług w ramach aplikacji
+• Personalizacji doświadczeń użytkownika
+• Usprawnienia funkcjonowania aplikacji
+• Komunikacji z użytkownikiem
+• Analiz statystycznych''',
           ),
-          // Dodaj więcej sekcji według potrzeb
+          _PolicySection(
+            title: '5. Podstawa Prawna',
+            content: '''Przetwarzamy Twoje dane na podstawie:
+• Zgody użytkownika
+• Realizacji umowy
+• Prawnie uzasadnionego interesu administratora
+• Obowiązków prawnych''',
+          ),
+          _PolicySection(
+            title: '6. Przechowywanie Danych',
+            content: 'Twoje dane są przechowywane na bezpiecznych serwerach z szyfrowaniem. Stosujemy najnowsze technologie zabezpieczeń i regularnie aktualizujemy nasze systemy bezpieczeństwa.',
+          ),
+          _PolicySection(
+            title: '7. Prawa Użytkownika',
+            content: '''Masz prawo do:
+• Dostępu do swoich danych
+• Sprostowania danych
+• Usunięcia danych
+• Ograniczenia przetwarzania
+• Przenoszenia danych
+• Wniesienia sprzeciwu''',
+          ),
+          _PolicySection(
+            title: '8. Pliki Cookie',
+            content: 'Używamy plików cookie i podobnych technologii do śledzenia aktywności w naszej aplikacji i przechowywania określonych informacji.',
+          ),
+          _PolicySection(
+            title: '9. Udostępnianie Danych',
+            content: 'Nie sprzedajemy ani nie udostępniamy Twoich danych osobowych podmiotom trzecim, z wyjątkiem sytuacji opisanych w niniejszej polityce.',
+          ),
+          _PolicySection(
+            title: '10. Kontakt',
+            content: 'W sprawach związanych z ochroną danych osobowych możesz kontaktować się z nami pod adresem: privacy@nawykomat.pl',
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _PolicySection extends StatelessWidget {
+  final String title;
+  final String content;
+
+  const _PolicySection({
+    required this.title,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          content,
+          style: const TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 }
@@ -236,8 +311,8 @@ class AboutAppPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.asset(
-                'assets/app_logo.png', // Dodaj logo aplikacji
+              child: SvgPicture.asset(
+                'assets/app_logo.svg',
                 height: 120,
               ),
             ),

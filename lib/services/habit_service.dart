@@ -127,4 +127,83 @@ class HabitService {
     }
     return 0;
   }
+
+  Future<Map<DateTime, double>> getMonthlyCompletionRates() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final habits = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .get();
+
+      Map<DateTime, int> totalByDate = {};
+      Map<DateTime, int> completedByDate = {};
+
+      for (var habit in habits.docs) {
+        final data = habit.data();
+        final startDate = (data['startDate'] as Timestamp).toDate();
+        final now = DateTime.now();
+        
+        // Pobierz wszystkie uzupełnienia dla tego nawyku
+        final completions = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('habits')
+            .doc(habit.id)
+            .collection('completions')
+            .get();
+
+        for (var completion in completions.docs) {
+          final date = (completion.data()['date'] as Timestamp).toDate();
+          final dateKey = DateTime(date.year, date.month, date.day);
+          completedByDate[dateKey] = (completedByDate[dateKey] ?? 0) + 1;
+          totalByDate[dateKey] = (totalByDate[dateKey] ?? 0) + 1;
+        }
+      }
+
+      // Oblicz procent ukończenia dla każdego dnia
+      Map<DateTime, double> completionRates = {};
+      totalByDate.forEach((date, total) {
+        final completed = completedByDate[date] ?? 0;
+        completionRates[date] = completed / total;
+      });
+
+      return completionRates;
+    }
+    return {};
+  }
+
+  Future<Map<int, double>> getMonthlyComparison() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final now = DateTime.now();
+      final sixMonthsAgo = DateTime(now.year, now.month - 5, 1);
+      
+      final habits = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .where('startDate', isGreaterThanOrEqualTo: Timestamp.fromDate(sixMonthsAgo))
+          .get();
+
+      Map<int, int> totalByMonth = {};
+      Map<int, int> completedByMonth = {};
+
+      for (var habit in habits.docs) {
+        // Podobna logika jak powyżej, ale grupowanie po miesiącach
+        // ...
+      }
+
+      // Oblicz procent ukończenia dla każdego miesiąca
+      Map<int, double> monthlyRates = {};
+      totalByMonth.forEach((month, total) {
+        final completed = completedByMonth[month] ?? 0;
+        monthlyRates[month] = total > 0 ? completed / total : 0;
+      });
+
+      return monthlyRates;
+    }
+    return {};
+  }
 }

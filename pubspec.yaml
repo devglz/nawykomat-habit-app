@@ -28,6 +28,7 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_slidable: ^3.1.1
   provider: ^6.1.2
+  table_calendar: ^3.0.8
 
   web: ^1.0.0
   rename: ^3.0.2
@@ -43,6 +44,8 @@ flutter:
   assets:
     - assets/google_logo.png
     - assets/app_logo.png
+    - assets/app_logo.svg
+
     - assets/images/jak-tworzyc-dobre-nawyki.jpg
     - assets/images/zarzadzanie-czasem.jpg
     - assets/images/motywacja-do-dzialania.jpg

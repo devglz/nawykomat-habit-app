@@ -9,7 +9,7 @@ import 'package:habit_app/ui/progress/progress_page.dart';
 import 'package:habit_app/ui/news/news_page.dart';
 import 'package:habit_app/ui/settings/settings_page.dart';
 import 'package:habit_app/ui/settings/personalization_page.dart';
-import 'package:habit_app/ui/settings/notifications_page.dart'; // Dodaj ten import
+import 'package:habit_app/ui/settings/notifications_page.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart'; // Import do obsługi kIsWeb
 import 'package:provider/provider.dart';
@@ -37,11 +37,49 @@ void main() async {
         Provider<HabitService>(
           create: (_) => HabitService(),
         ),
-        // ...other providers if any...
+        // ...inne provider'y, jeśli są...
       ],
-      child: const MyApp(),
+      child: const MyAppWebWrapper(), // Użycie MyAppWebWrapper
     ),
   );
+}
+
+class MyAppWebWrapper extends StatelessWidget {
+  const MyAppWebWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        body: kIsWeb
+            ? Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 0, 0, 0),
+                      Colors.purple,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: 1300,
+                      height: 900,
+                      color: Colors.white, // Tło dla głównej aplikacji
+                      child: const MyApp(),
+                    ),
+                  ),
+                ),
+              )
+            : const MyApp(),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -56,19 +94,18 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       initialRoute: '/',
-  routes: {
-  '/': (context) => const SplashPage(),
-  '/login': (context) => const LoginPage(),
-  '/register': (context) => const RegisterPage(),
-  '/home': (context) => const HomePage(),
-  '/addHabit': (context) => const AddHabitPage(),
-  '/progress': (context) => const ProgressPage(),
-  '/news': (context) => const NewsPage(),
-  '/settings': (context) => const SettingsPage(),
-  '/personalization': (context) => const PersonalizationPage(),
-  '/notifications': (context) => const NotificationsPage(),
-},
-
+      routes: {
+        '/': (context) => const SplashPage(),
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/home': (context) => const HomePage(),
+        '/addHabit': (context) => const AddHabitPage(),
+        '/progress': (context) => const ProgressPage(),
+        '/news': (context) => const NewsPage(),
+        '/settings': (context) => const SettingsPage(),
+        '/personalization': (context) => const PersonalizationPage(),
+        '/notifications': (context) => const NotificationsPage(),
+      },
     );
   }
 }

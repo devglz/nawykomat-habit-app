@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habit_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Dodaj ten import
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -113,6 +114,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      SvgPicture.asset(
+                        'assets/app_logo.svg',
+                        height: 80,
+                      ),
+                      const SizedBox(height: 24),
                       Text(
                         'Rejestracja',
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
