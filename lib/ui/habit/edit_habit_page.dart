@@ -264,6 +264,34 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
                       child: const Text('ANULUJ'),
                     ),
                   ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(color: Colors.red),
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: () async {
+                        // Implementacja usuwania nawyku
+                        try {
+                          await HabitService().deleteHabit(widget.habit.id);
+                          if (mounted) {
+                            Navigator.pop(context);
+                          }
+                        } catch (e) {
+                          _showError('Wystąpił błąd: $e');
+                        }
+                      },
+                      child: const Text(
+                        'USUŃ NAWYK',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],

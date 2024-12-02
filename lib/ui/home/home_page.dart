@@ -7,6 +7,7 @@ import 'package:habit_app/ui/progress/progress_page.dart';
 import 'package:habit_app/ui/settings/settings_page.dart';
 import 'package:habit_app/ui/habit/edit_habit_page.dart'; // Dodaj import
 import 'package:habit_app/services/auth_service.dart'; // Dodaj import
+import 'package:intl/intl.dart'; // Dodaj import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,7 +31,21 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: _currentIndex == 0
           ? AppBar(
-              title: const Text('Nawykomat'),
+              title: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now()),
+                      style: const TextStyle(color: Colors.black, fontSize: 14, fontFamily: 'Roboto'), // Zmień czcionkę
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: const Text('Nawykomat', style: TextStyle(color: Colors.black)),
+                  ),
+                ],
+              ),
               backgroundColor: Colors.white,
               automaticallyImplyLeading: false,
               actions: [
