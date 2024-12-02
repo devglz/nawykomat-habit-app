@@ -74,8 +74,8 @@ class NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Powiadomienia'),
-        backgroundColor: Colors.yellowAccent,
+        title: const Text('Powiadomienia', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF6750A4),
       ),
       body: ListView(
         children: [

@@ -378,8 +378,8 @@ class SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ustawienia'),
-        backgroundColor: Colors.yellowAccent,
+        title: const Text('Ustawienia', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF6750A4),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {

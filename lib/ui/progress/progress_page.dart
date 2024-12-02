@@ -93,10 +93,10 @@ class ProgressPage extends StatelessWidget {
         builder: (context, state, _) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Statystyki i postępy'),
-              backgroundColor: Color.fromARGB(255, 255, 253, 208),
+              title: const Text('Statystyki i postępy', style: TextStyle(color: Colors.white)),
+              backgroundColor: const Color(0xFF6750A4),
               leading: IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
                   Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                 },
