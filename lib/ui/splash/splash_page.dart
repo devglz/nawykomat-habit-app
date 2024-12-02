@@ -105,7 +105,7 @@ class _SplashPageState extends State<SplashPage> {
         child: Stack(
           children: [
             Positioned(
-              top: 70,
+              top: 120,
               left: 0,
               right: 0,
               child: Text(

@@ -78,10 +78,10 @@ class ProgressPageState extends ChangeNotifier {
   // Dodaj metodę do obliczania procentowego postępu dla każdego dnia tygodnia
   Map<String, double> getWeeklyProgressPercentage() {
     final Map<String, double> weeklyProgressPercentage = {};
-    const days = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+    const fullDays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
     for (int i = 1; i <= 7; i++) {
       final completionsCount = completionsByDay[i] ?? 0;
-      weeklyProgressPercentage[days[i - 1]] = (completionsCount / activeHabits) * 100;
+      weeklyProgressPercentage[fullDays[i - 1]] = (completionsCount / activeHabits) * 100;
     }
     return weeklyProgressPercentage;
   }
@@ -154,11 +154,11 @@ class ProgressPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Nawyki miesięczne',
+                    'Procent wykonania nawyków od stycznia do grudnia',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  _buildMonthlyHabitCharts(context),
+                  _buildYearlyProgressChart(context),
                 ],
               ),
             ),
@@ -216,14 +216,15 @@ class ProgressPage extends StatelessWidget {
   }
 
   Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage) {
-    const days = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+    const shortDays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
+    const fullDays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
     return SizedBox(
       height: 300,
       child: BarChart(
         BarChartData(
           maxY: 100,
           alignment: BarChartAlignment.spaceAround,
-          barGroups: days.asMap().entries.map((entry) {
+          barGroups: fullDays.asMap().entries.map((entry) {
             final dayIndex = entry.key;
             final dayName = entry.value;
             final progress = weeklyProgressPercentage[dayName] ?? 0.0;
@@ -260,8 +261,8 @@ class ProgressPage extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  if (value >= 0 && value < days.length) {
-                    return Text(days[value.toInt()], style: TextStyle(color: Colors.black));
+                  if (value >= 0 && value < shortDays.length) {
+                    return Text(shortDays[value.toInt()], style: TextStyle(color: Colors.black));
                   }
                   return const Text('');
                 },
@@ -276,7 +277,7 @@ class ProgressPage extends StatelessWidget {
               tooltipMargin: 8,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
-                  '${days[group.x]}: ${rod.toY.toStringAsFixed(1)}%',
+                  '${fullDays[group.x]}: ${rod.toY.toStringAsFixed(1)}%',
                   TextStyle(color: Colors.white),
                 );
               },
@@ -287,93 +288,36 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMonthlyHabitCharts(BuildContext context) {
+  Widget _buildYearlyProgressChart(BuildContext context) {
+    final months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
     final habitService = context.read<HabitService>();
-    return FutureBuilder<QuerySnapshot>(
-      future: habitService.getHabits().first,
+    return FutureBuilder<Map<String, double>>(
+      future: habitService.getYearlyCompletionPercentage(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Text('Brak nawyków do wyświetlenia');
-        }
-
-        final habits = snapshot.data!.docs;
+        final yearlyProgress = snapshot.data ?? {};
         return Column(
-          children: habits.map((habit) {
-            final habitData = habit.data() as Map<String, dynamic>;
-            final habitName = habitData['name'] as String;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  habitName,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                _buildMonthlyBarChart(context, habit.id),
-                const SizedBox(height: 20),
-              ],
+          children: months.map((month) {
+            final progress = yearlyProgress[month] ?? 0.0;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    month,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    '${progress.toStringAsFixed(1)}%',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             );
           }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildMonthlyBarChart(BuildContext context, String habitId) {
-    return FutureBuilder<Map<DateTime, bool>>(
-      future: context.read<HabitService>().getMonthlyCompletionStatus(habitId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
-
-        final now = DateTime.now();
-        final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
-        final monthlyStatus = snapshot.data ?? {};
-        final spots = List.generate(daysInMonth, (index) {
-          final day = index + 1;
-          final date = DateTime(now.year, now.month, day);
-          final isCompleted = monthlyStatus[date] ?? false;
-          return FlSpot(day.toDouble(), isCompleted ? 100 : 0);
-        });
-
-        return SizedBox(
-          height: 200,
-          child: LineChart(
-            LineChartData(
-              lineBarsData: [
-                LineChartBarData(
-                  spots: spots,
-                  isCurved: true,
-                  color: Colors.blue,
-                  barWidth: 4,
-                  belowBarData: BarAreaData(show: false),
-                ),
-              ],
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 20,
-                    getTitlesWidget: (value, meta) {
-                      return Text('${value.toInt()}%');
-                    },
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      return Text('${value.toInt()}');
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
         );
       },
     );

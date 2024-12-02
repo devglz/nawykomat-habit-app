@@ -32,6 +32,7 @@ class HabitService {
         'reminders': reminders,
         'selectedDays': selectedDays,
         'createdAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(), // Dodaj pole updatedAt
       });
     }
   }
@@ -39,6 +40,7 @@ class HabitService {
   Future<void> updateHabit(String habitId, Map<String, dynamic> data) async {
     final user = _auth.currentUser;
     if (user != null) {
+      data['updatedAt'] = Timestamp.now(); // Aktualizuj pole updatedAt
       await _firestore.collection('users').doc(user.uid).collection('habits').doc(habitId).update(data);
     }
   }
@@ -92,6 +94,7 @@ class HabitService {
       await habitRef.update({
         'isCompleted': !currentStatus,
         'updatedAt': FieldValue.serverTimestamp(),
+        if (!currentStatus) 'completedID': FieldValue.serverTimestamp(), // Aktualizuj completedID, jeśli nawyk jest ukończony
       });
       
       print('Successfully toggled habit completion: $habitId'); // Debug log
@@ -234,5 +237,73 @@ class HabitService {
       return completionStatus;
     }
     return {};
+  }
+
+  Future<Map<String, double>> getYearlyCompletionPercentage() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final now = DateTime.now();
+      final startOfYear = DateTime(now.year, 1, 1);
+      final endOfYear = DateTime(now.year, 12, 31);
+
+      final habits = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .where('startDate', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(endOfYear))
+          .get();
+
+      Map<int, int> totalByMonth = {};
+      Map<int, int> completedByMonth = {};
+
+      for (var habit in habits.docs) {
+        final data = habit.data();
+        final startDate = (data['startDate'] as Timestamp).toDate();
+        final completedDate = (data['completedID'] as Timestamp?)?.toDate();
+
+        if (completedDate != null) {
+          final month = completedDate.month;
+          completedByMonth[month] = (completedByMonth[month] ?? 0) + 1;
+        }
+
+        for (int month = startDate.month; month <= now.month; month++) {
+          totalByMonth[month] = (totalByMonth[month] ?? 0) + 1;
+        }
+      }
+
+      if (!totalByMonth.containsKey(now.month)) {
+        totalByMonth[now.month] = 0;
+      }
+      if (!completedByMonth.containsKey(now.month)) {
+        completedByMonth[now.month] = 0;
+      }
+
+      Map<String, double> monthlyRates = {};
+      const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+      for (int i = 1; i <= 12; i++) {
+        final total = totalByMonth[i] ?? 0;
+        final completed = completedByMonth[i] ?? 0;
+        monthlyRates[months[i - 1]] = total > 0 ? (completed / total) * 100 : 0;
+      }
+
+      return monthlyRates;
+    }
+    return {};
+  }
+
+  Future<void> updateProgress(String habitId) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final habitRef = _firestore.collection('users').doc(user.uid).collection('habits').doc(habitId);
+      final doc = await habitRef.get();
+      if (doc.exists) {
+        final currentProgress = doc.data()?['progress'] ?? 0;
+        await habitRef.update({
+          'progress': currentProgress + 1,
+          'updatedAt': Timestamp.now(),
+        });
+      }
+    }
   }
 }
