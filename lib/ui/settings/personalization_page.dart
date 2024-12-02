@@ -12,8 +12,8 @@ class PersonalizationPage extends StatefulWidget {
 class PersonalizationPageState extends State<PersonalizationPage> {
   bool isDarkMode = false;
   double fontSize = 16.0;
-  String selectedColor = 'Yellow';
-  final List<String> colorOptions = ['Yellow', 'Blue', 'Green', 'Purple', 'Red'];
+  String selectedColor = 'Fioletowy';
+  final List<String> colorOptions = ['Niebieski', 'Zielony', 'Fioletowy', 'Czerwony', 'Brązowy', 'Czarny', 'Szary', 'Pomarańczowy', 'Różowy', 'Limonkowy'];
 
   @override
   void initState() {
@@ -23,10 +23,13 @@ class PersonalizationPageState extends State<PersonalizationPage> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isDarkMode = prefs.getBool('darkMode') ?? false;
-      fontSize = prefs.getDouble('fontSize') ?? 16.0;
-      selectedColor = prefs.getString('themeColor') ?? 'Yellow';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        isDarkMode = prefs.getBool('darkMode') ?? false;
+        fontSize = prefs.getDouble('fontSize') ?? 16.0;
+        selectedColor = prefs.getString('themeColor') ?? 'Fioletowy';
+        _applyThemeColor(selectedColor);
+      });
     });
   }
 
@@ -35,6 +38,43 @@ class PersonalizationPageState extends State<PersonalizationPage> {
     await prefs.setBool('darkMode', isDarkMode);
     await prefs.setDouble('fontSize', fontSize);
     await prefs.setString('themeColor', selectedColor);
+    _applyThemeColor(selectedColor);
+  }
+
+  void _applyThemeColor(String color) {
+    Color themeColor;
+    switch (color) {
+      case 'Niebieski':
+        themeColor = Colors.blue;
+        break;
+      case 'Zielony':
+        themeColor = Colors.green;
+        break;
+      case 'Czerwony':
+        themeColor = Colors.red;
+        break;
+      case 'Brązowy':
+        themeColor = Colors.brown;
+        break;
+      case 'Czarny':
+        themeColor = Colors.black;
+        break;
+      case 'Szary':
+        themeColor = Colors.grey;
+        break;
+      case 'Pomarańczowy':
+        themeColor = Colors.orange;
+        break;
+      case 'Różowy':
+        themeColor = Colors.pink;
+        break;
+      case 'Limonkowy':
+        themeColor = Colors.lime;
+        break;
+      default:
+        themeColor = const Color(0xFF6750A4); // Fioletowy
+    }
+    MyApp.of(context)?.setThemeColor(themeColor);
   }
 
   void _toggleDarkMode(bool isDarkMode) {
@@ -47,7 +87,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Personalizacja', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),

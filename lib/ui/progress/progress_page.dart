@@ -124,7 +124,7 @@ class ProgressPage extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: const Text('Statystyki i postępy', style: TextStyle(color: Colors.white)),
-              backgroundColor: const Color(0xFF6750A4),
+              backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {

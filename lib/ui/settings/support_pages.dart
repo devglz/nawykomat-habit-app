@@ -11,7 +11,7 @@ class ContactPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Kontakt', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -107,7 +107,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Opinie', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -188,7 +188,7 @@ class PrivacyPolicyPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Polityka Prywatności', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -303,7 +303,7 @@ class AboutAppPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('O aplikacji', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -342,6 +342,27 @@ class AboutAppPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class SupportPage extends StatelessWidget {
+  const SupportPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Wsparcie', style: TextStyle(color: Colors.white)),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: Text('Strona wsparcia wkrótce!'),
       ),
     );
   }

@@ -380,12 +380,33 @@ class SettingsPageState extends State<SettingsPage> {
     MyApp.of(context)?.setThemeMode(themeMode);
   }
 
+  void _applyThemeColor(String color) {
+    Color themeColor;
+    switch (color) {
+      case 'Yellow':
+        themeColor = Colors.yellow;
+        break;
+      case 'Blue':
+        themeColor = Colors.blue;
+        break;
+      case 'Green':
+        themeColor = Colors.green;
+        break;
+      case 'Red':
+        themeColor = Colors.red;
+        break;
+      default:
+        themeColor = const Color(0xFF6750A4); // Purple
+    }
+    MyApp.of(context)?.setThemeColor(themeColor);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ustawienia', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -499,7 +520,7 @@ class SettingsPageState extends State<SettingsPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ContactPage()),
+                      MaterialPageRoute(builder: (context) => const ContactPage()),
                     );
                   },
                 ),
@@ -511,7 +532,7 @@ class SettingsPageState extends State<SettingsPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => FeedbackPage()),
+                      MaterialPageRoute(builder: (context) => const FeedbackPage()),
                     );
                   },
                 ),
@@ -523,7 +544,7 @@ class SettingsPageState extends State<SettingsPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => PrivacyPolicyPage()),
+                      MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()),
                     );
                   },
                 ),
@@ -535,7 +556,7 @@ class SettingsPageState extends State<SettingsPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AboutAppPage()),
+                      MaterialPageRoute(builder: (context) => const AboutAppPage()),
                     );
                   },
                 ),

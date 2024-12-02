@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
 
-  @override
+  @override 
   NotificationsPageState createState() => NotificationsPageState();
 }
 
@@ -75,7 +75,7 @@ class NotificationsPageState extends State<NotificationsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Powiadomienia', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: ListView(
         children: [

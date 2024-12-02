@@ -93,10 +93,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.light; // Ustaw domyślnie jasny motyw
+  Color _themeColor = const Color(0xFF6750A4); // Domyślny kolor motywu (Purple)
 
   void setThemeMode(ThemeMode themeMode) {
     setState(() {
       _themeMode = themeMode;
+    });
+  }
+
+  void setThemeColor(Color color) {
+    setState(() {
+      _themeColor = color;
     });
   }
 
@@ -105,8 +112,8 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Nawykomat',
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+      theme: ThemeData.light().copyWith(primaryColor: _themeColor),
+      darkTheme: ThemeData.dark().copyWith(primaryColor: _themeColor),
       themeMode: _themeMode, // Użyj zmiennej _themeMode
       initialRoute: '/',
       routes: {

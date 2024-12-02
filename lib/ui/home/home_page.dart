@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              backgroundColor: Colors.white,
+              backgroundColor: Colors.white, // Zawsze biały kolor tła
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
@@ -77,8 +77,8 @@ class _HomePageState extends State<HomePage> {
             _currentIndex = index;
           });
         },
-        selectedItemColor: Colors.purple, // Dodaj kolor aktywnej ikony
-        unselectedItemColor: Colors.grey, // Dodaj kolor nieaktywnej ikony
+        selectedItemColor: Theme.of(context).primaryColor, // Użyj koloru motywu
+        unselectedItemColor: Colors.grey,
       ),
     );
   }
@@ -94,7 +94,7 @@ class HomePageContent extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            color: Theme.of(context).primaryColor,
+            color: Theme.of(context).primaryColor, // Użyj koloru motywu
             child: const TabBar(
               indicatorColor: Colors.white,
               indicatorWeight: 4.0,
