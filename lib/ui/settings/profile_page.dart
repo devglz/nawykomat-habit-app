@@ -260,13 +260,51 @@ class ProfilePage extends StatelessWidget {
   }
 
   Future<void> _deleteAccount(BuildContext context) async {
-    final confirm = await _showConfirmationDialogWithLogo(context, 'Czy na pewno chcesz usunąć swoje konto?');
-    if (confirm) {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.delete();
-      }
-    }
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Column(
+            children: [
+              SvgPicture.asset(
+                'assets/app_logo.svg',
+                height: 80,
+              ),
+              const SizedBox(height: 16),
+              const Text('Usuwanie konta'),
+            ],
+          ),
+          content: const Text('Czy na pewno chcesz usunąć swoje konto?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Anuluj'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  try {
+                    // Usuń dane użytkownika z Firestore
+                    await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
+                    // Usuń konto użytkownika z Firebase Authentication
+                    await user.delete();
+                    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Wystąpił błąd podczas usuwania konta: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Usuń konto'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _signOut(BuildContext context) async {

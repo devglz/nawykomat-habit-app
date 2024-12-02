@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:habit_app/ui/news/news_page.dart';
 import 'package:habit_app/ui/progress/progress_page.dart';
 import 'package:habit_app/ui/settings/settings_page.dart';
+import 'package:habit_app/ui/habit/edit_habit_page.dart'; // Dodaj import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,14 +30,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nawykomat'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => Navigator.pushNamed(context, '/addHabit'),
-          ),
-        ],
       ),
       body: _pages[_currentIndex],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(context, '/addHabit'),
+        child: const Icon(Icons.add),
+      ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -209,6 +208,7 @@ class HabitList extends StatelessWidget {
               startDate: data['startDate'] as Timestamp,
               dayArea: data['dayArea'] ?? 'Unknown',
               reminders: List<String>.from(data['reminders'] ?? []),
+              habit: habit, // Dodaj przekazanie habit
             );
           },
         );
@@ -226,6 +226,7 @@ class HabitCard extends StatelessWidget {
   final Timestamp startDate;
   final String dayArea;
   final List<String> reminders;
+  final DocumentSnapshot habit; // Dodaj pole habit
 
   const HabitCard({
     required this.habitId,
@@ -236,6 +237,7 @@ class HabitCard extends StatelessWidget {
     required this.startDate,
     required this.dayArea,
     required this.reminders,
+    required this.habit, // Dodaj pole habit
     super.key,
   });
 
@@ -248,35 +250,51 @@ class HabitCard extends StatelessWidget {
       child: ListTile(
         title: Text(title),
         subtitle: Text(description),
-        trailing: IconButton(
-          icon: Icon(
-            isCompleted ? Icons.check_circle : Icons.circle_outlined,
-            color: isCompleted ? Colors.green : Colors.grey,
-            size: 30,
-          ),
-          onPressed: () async {
-            print('Toggling habit: $habitId');
-            try {
-              await HabitService().toggleHabitCompletion(habitId, isCompleted);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                isCompleted ? Icons.check_circle : Icons.circle_outlined,
+                color: isCompleted ? Colors.green : Colors.grey,
+                size: 30,
+              ),
+              onPressed: () async {
+                print('Toggling habit: $habitId');
+                try {
+                  await HabitService().toggleHabitCompletion(habitId, isCompleted);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
+                      ),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                } catch (e) {
+                  print('Error in HabitCard toggle: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Błąd: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                }
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blue),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditHabitPage(habit: habit),
                   ),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            } catch (e) {
-              print('Error in HabitCard toggle: $e');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Błąd: ${e.toString()}'),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            }
-          },
+                );
+              },
+            ),
+          ],
         ),
         onTap: () {
           Navigator.pushNamed(context, '/habitDetail', arguments: habitId);
