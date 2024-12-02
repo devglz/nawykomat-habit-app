@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Dodaj ten import
 import 'package:habit_app/ui/splash/splash_page.dart';
 import 'package:habit_app/ui/login/login_page.dart';
 import 'package:habit_app/ui/register/register_page.dart';
@@ -85,15 +86,50 @@ class MyAppWebWrapper extends StatelessWidget {
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  static _MyAppState? of(BuildContext context) => context.findAncestorStateOfType<_MyAppState>();
+  static MyAppState? of(BuildContext context) => context.findAncestorStateOfType<MyAppState>();
 
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.light; // Ustaw domyślnie jasny motyw
-  Color _themeColor = const Color(0xFF6750A4); // Domyślny kolor motywu (Purple)
+  Color _themeColor = const Color(0xFF6750A4); // Domyślny fioletowy kolor
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTheme();
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        _initializeTheme();
+      }
+    });
+  }
+
+  Future<void> _initializeTheme() async {
+    final habitService = context.read<HabitService>();
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        final colorString = await habitService.getThemeColor();
+        if (colorString != null) {
+          debugPrint('Ustawiam kolor motywu: $colorString');
+          setThemeColor(_colorFromString(colorString)); // Załaduj kolor z bazy
+        } else {
+          debugPrint('Brak koloru w bazie danych, używam domyślnego koloru');
+          setThemeColor(const Color(0xFF6750A4)); // Domyślny fioletowy
+        }
+      } catch (e) {
+        debugPrint('Błąd podczas inicjalizacji motywu: $e');
+        setThemeColor(const Color(0xFF6750A4)); // Domyślny fioletowy
+      }
+    } else {
+      debugPrint('Użytkownik nie jest zalogowany, używam domyślnego koloru');
+      setThemeColor(const Color(0xFF6750A4)); // Domyślny fioletowy
+    }
+  }
 
   void setThemeMode(ThemeMode themeMode) {
     setState(() {
@@ -105,6 +141,31 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _themeColor = color;
     });
+  }
+
+  Color _colorFromString(String colorString) {
+    switch (colorString.toLowerCase()) { // Dodaj obsługę małych i dużych liter
+      case 'niebieski':
+        return Colors.blue;
+      case 'zielony':
+        return Colors.green;
+      case 'czerwony':
+        return Colors.red;
+      case 'brązowy':
+        return Colors.brown;
+      case 'czarny':
+        return Colors.black;
+      case 'szary':
+        return Colors.grey;
+      case 'pomarańczowy':
+        return Colors.orange;
+      case 'różowy':
+        return Colors.pink;
+      case 'limonkowy':
+        return Colors.lime;
+      default:
+        return const Color(0xFF6750A4); // Domyślny fioletowy kolor
+    }
   }
 
   @override

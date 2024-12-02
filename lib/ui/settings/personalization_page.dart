@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:habit_app/main.dart'; // Dodaj ten import
+import 'package:provider/provider.dart'; // Dodaj ten import
+import 'package:habit_app/services/habit_service.dart';
+
 
 class PersonalizationPage extends StatefulWidget {
   const PersonalizationPage({super.key});
@@ -39,6 +42,9 @@ class PersonalizationPageState extends State<PersonalizationPage> {
     await prefs.setDouble('fontSize', fontSize);
     await prefs.setString('themeColor', selectedColor);
     _applyThemeColor(selectedColor);
+    if (!mounted) return;
+    final habitService = Provider.of<HabitService>(context, listen: false);
+    await habitService.saveThemeColor(selectedColor);
   }
 
   void _applyThemeColor(String color) {

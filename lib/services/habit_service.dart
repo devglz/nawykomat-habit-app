@@ -306,4 +306,46 @@ class HabitService {
       }
     }
   }
+
+  Future<void> saveThemeColor(String color) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).set({
+        'themeColor': color,
+      }, SetOptions(merge: true));
+    }
+  }
+
+Future<String?> getThemeColor() async {
+  final user = _auth.currentUser;
+  
+  if (user == null) {
+    debugPrint('Użytkownik nie jest zalogowany! Nie ustawiam koloru.');
+    return null; // Nie rób nic, jeśli użytkownik nie jest zalogowany
+  }
+
+  try {
+    debugPrint('Pobieram dane dla użytkownika o ID: ${user.uid}');
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+
+    if (doc.exists) {
+      final data = doc.data();
+      debugPrint('Dane użytkownika: $data');
+
+      final themeColor = data?['themeColor'] as String?;
+      if (themeColor != null) {
+        debugPrint('Odczytano themeColor: $themeColor');
+        return themeColor;
+      } else {
+        debugPrint('Pole themeColor nie istnieje w dokumencie!');
+      }
+    } else {
+      debugPrint('Dokument użytkownika nie istnieje!');
+    }
+  } catch (e) {
+    debugPrint('Błąd podczas odczytu themeColor: $e');
+  }
+
+  return null; // Jeśli nic nie znaleziono, zwróć null
+}
 }
