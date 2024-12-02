@@ -143,11 +143,11 @@ class ProgressPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: _buildStatisticCard('Aktywne nawyki', state.activeHabits.toString())),
-                      Expanded(child: _buildStatisticCard('Ukończone zadania', state.completedHabits.toString())),
-                      Expanded(child: _buildStatisticCard('Procent sukcesu', '${state.successRate.toStringAsFixed(1)}%')),
+                      _buildStatisticCard('Aktywne nawyki', state.activeHabits.toString()),
+                      _buildStatisticCard('Ukończone zadania', state.completedHabits.toString()),
+                      _buildStatisticCard('Procent sukcesu', '${state.successRate.toStringAsFixed(1)}%'),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -181,23 +181,29 @@ class ProgressPage extends StatelessWidget {
   }
 
   Widget _buildStatisticCard(String title, String value) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ],
+    return SizedBox(
+      width: 130, // Ustal szerokość kart
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), // Zmniejsz rozmiar czcionki
+              ),
+              const SizedBox(height: 10),
+              Text(
+                value,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), // Zmniejsz rozmiar czcionki
+              ),
+            ],
+          ),
         ),
       ),
     );

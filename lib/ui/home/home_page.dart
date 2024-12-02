@@ -257,7 +257,7 @@ class HabitList extends StatelessWidget {
   }
 }
 
-class HabitCard extends StatelessWidget {
+class HabitCard extends StatefulWidget {
   final String habitId;
   final String title;
   final String description;
@@ -282,40 +282,45 @@ class HabitCard extends StatelessWidget {
   });
 
   @override
+  _HabitCardState createState() => _HabitCardState();
+}
+
+class _HabitCardState extends State<HabitCard> {
+  @override
   Widget build(BuildContext context) {
-    print('Rendering HabitCard: $habitId');
+    print('Rendering HabitCard: ${widget.habitId}');
     
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: ListTile(
-        title: Text(title),
-        subtitle: Text(description),
+        title: Text(widget.title),
+        subtitle: Text(widget.description),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               icon: Icon(
-                isCompleted ? Icons.check_circle : Icons.circle_outlined,
-                color: isCompleted ? Colors.green : Colors.grey,
+                widget.isCompleted ? Icons.check_circle : Icons.circle_outlined,
+                color: widget.isCompleted ? Colors.green : Colors.grey,
                 size: 30,
               ),
               onPressed: () async {
-                print('Toggling habit: $habitId');
+                print('Toggling habit: ${widget.habitId}');
                 try {
-                  await HabitService().toggleHabitCompletion(habitId, isCompleted);
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                  await HabitService().toggleHabitCompletion(widget.habitId, widget.isCompleted);
+                  if (mounted) { // Sprawdź, czy widget jest zamontowany
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
+                          widget.isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
                         ),
                         duration: const Duration(seconds: 2),
                       ),
                     );
-                  });
+                  }
                 } catch (e) {
                   print('Error in HabitCard toggle: $e');
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) { // Sprawdź, czy widget jest zamontowany
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Błąd: ${e.toString()}'),
@@ -323,7 +328,7 @@ class HabitCard extends StatelessWidget {
                         duration: const Duration(seconds: 3),
                       ),
                     );
-                  });
+                  }
                 }
               },
             ),
@@ -333,7 +338,7 @@ class HabitCard extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditHabitPage(habit: habit),
+                    builder: (context) => EditHabitPage(habit: widget.habit),
                   ),
                 );
               },
@@ -341,7 +346,7 @@ class HabitCard extends StatelessWidget {
           ],
         ),
         onTap: () {
-          Navigator.pushNamed(context, '/habitDetail', arguments: habitId);
+          Navigator.pushNamed(context, '/habitDetail', arguments: widget.habitId);
         },
       ),
     );
