@@ -8,6 +8,7 @@ import 'package:habit_app/ui/settings/settings_page.dart';
 import 'package:habit_app/ui/habit/edit_habit_page.dart'; // Dodaj import
 import 'package:habit_app/services/auth_service.dart'; // Dodaj import
 import 'package:intl/intl.dart'; // Dodaj import
+import 'package:flutter/foundation.dart' show kIsWeb; // Dodaj import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,16 +34,19 @@ class _HomePageState extends State<HomePage> {
           ? AppBar(
               title: Stack(
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now()),
-                      style: const TextStyle(color: Colors.black, fontSize: 14, fontFamily: 'Roboto'), // Zmień czcionkę
+                  if (kIsWeb) // Dodaj warunek
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now()),
+                        style: const TextStyle(color: Colors.black, fontSize: 14, fontFamily: 'Roboto'), // Zmień czcionkę
+                      ),
                     ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: const Text('Nawykomat', style: TextStyle(color: Colors.black)),
+                  Center(
+                    child: Padding( // Dodaj Padding
+                      padding: const EdgeInsets.only(left: 50.0), // Przesuń lekko w lewo
+                      child: const Text('Nawykomat', style: TextStyle(color: Colors.black)),
+                    ),
                   ),
                 ],
               ),
@@ -299,23 +303,27 @@ class HabitCard extends StatelessWidget {
                 print('Toggling habit: $habitId');
                 try {
                   await HabitService().toggleHabitCompletion(habitId, isCompleted);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
+                        ),
+                        duration: const Duration(seconds: 2),
                       ),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
+                    );
+                  });
                 } catch (e) {
                   print('Error in HabitCard toggle: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Błąd: ${e.toString()}'),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Błąd: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                  });
                 }
               },
             ),
