@@ -378,6 +378,8 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dodaj Nawyk'),
@@ -407,11 +409,12 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                   decoration: InputDecoration(
                     labelText: 'Nazwa nawyku',
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
+                  style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                 ),
               ),
               _buildSectionCard(
@@ -452,7 +455,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                       decoration: InputDecoration(
                         labelText: 'Pora dnia',
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -468,6 +471,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                           _dayArea = value!;
                         });
                       },
+                      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                     ),
                   ],
                 ),

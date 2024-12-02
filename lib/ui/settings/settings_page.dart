@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:habit_app/main.dart'; // Dodaj ten import
 import 'profile_page.dart';
 import 'personalization_page.dart'; // Dodaj ten import
 import './notifications_page.dart'; // Poprawiony import
@@ -374,6 +375,11 @@ class SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  void _toggleDarkMode(bool isDarkMode) {
+    final themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    MyApp.of(context)?.setThemeMode(themeMode);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -457,6 +463,13 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   },
+                ),
+                ListTile(
+                  title: const Text('Tryb ciemny'),
+                  trailing: Switch(
+                    value: Theme.of(context).brightness == Brightness.dark,
+                    onChanged: _toggleDarkMode,
+                  ),
                 ),
                 const Divider(),
                 _buildSectionHeader('Ustawienia konta'),

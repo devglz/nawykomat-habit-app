@@ -82,17 +82,32 @@ class MyAppWebWrapper extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  static _MyAppState? of(BuildContext context) => context.findAncestorStateOfType<_MyAppState>();
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.light; // Ustaw domyślnie jasny motyw
+
+  void setThemeMode(ThemeMode themeMode) {
+    setState(() {
+      _themeMode = themeMode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Nawykomat',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: _themeMode, // Użyj zmiennej _themeMode
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashPage(),
@@ -105,6 +120,16 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => const SettingsPage(),
         '/personalization': (context) => const PersonalizationPage(),
         '/notifications': (context) => const NotificationsPage(),
+      },
+      builder: (context, child) {
+        final currentRoute = ModalRoute.of(context)?.settings.name;
+        if (currentRoute == '/login' || currentRoute == '/register') {
+          return Theme(
+            data: ThemeData.light(),
+            child: child!,
+          );
+        }
+        return child!;
       },
     );
   }

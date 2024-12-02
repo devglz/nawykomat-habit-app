@@ -77,6 +77,8 @@ class _HomePageState extends State<HomePage> {
             _currentIndex = index;
           });
         },
+        selectedItemColor: Colors.purple, // Dodaj kolor aktywnej ikony
+        unselectedItemColor: Colors.grey, // Dodaj kolor nieaktywnej ikony
       ),
     );
   }

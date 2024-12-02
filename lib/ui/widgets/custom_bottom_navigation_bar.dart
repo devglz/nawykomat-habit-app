@@ -4,12 +4,16 @@ import 'package:flutter/material.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
-  final Function(int) onTap;
+  final ValueChanged<int> onTap;
+  final Color selectedItemColor;
+  final Color unselectedItemColor;
 
   const CustomBottomNavigationBar({
-    super.key,
     required this.currentIndex,
     required this.onTap,
+    this.selectedItemColor = Colors.blue, // Domyślny kolor aktywnej ikony
+    this.unselectedItemColor = Colors.grey, // Domyślny kolor nieaktywnej ikony
+    super.key,
   });
 
   @override
@@ -28,24 +32,24 @@ class CustomBottomNavigationBar extends StatelessWidget {
         currentIndex: currentIndex,
         onTap: onTap,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: selectedItemColor,
+        unselectedItemColor: unselectedItemColor,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Nawyki',
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.article),
-            label: 'Aktualności',
+            label: 'News',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Statystyki',
+            label: 'Progress',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Ustawienia',
+            label: 'Settings',
           ),
         ],
       ),

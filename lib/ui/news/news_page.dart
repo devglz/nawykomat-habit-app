@@ -136,6 +136,8 @@ class GuideDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -165,7 +167,7 @@ class GuideDetailPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDarkMode ? Colors.grey[800] : Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
@@ -178,7 +180,11 @@ class GuideDetailPage extends StatelessWidget {
                     ),
                     child: Text(
                       content,
-                      style: TextStyle(fontSize: 16, height: 1.5),
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.5,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),

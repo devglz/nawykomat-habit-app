@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:habit_app/main.dart'; // Dodaj ten import
 
 class PersonalizationPage extends StatefulWidget {
   const PersonalizationPage({super.key});
@@ -37,6 +37,11 @@ class PersonalizationPageState extends State<PersonalizationPage> {
     await prefs.setString('themeColor', selectedColor);
   }
 
+  void _toggleDarkMode(bool isDarkMode) {
+    final themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    MyApp.of(context)?.setThemeMode(themeMode);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,6 +75,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                     onChanged: (value) {
                       setState(() {
                         isDarkMode = value;
+                        _toggleDarkMode(value);
                         _saveSettings();
                       });
                     },
