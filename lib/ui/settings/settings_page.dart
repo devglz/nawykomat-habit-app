@@ -6,6 +6,8 @@ import 'profile_page.dart';
 import 'personalization_page.dart'; // Dodaj ten import
 import './notifications_page.dart'; // Poprawiony import
 import 'support_pages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -46,8 +48,24 @@ class SettingsPageState extends State<SettingsPage> {
   Future<void> _changeEmail(String newEmail) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await user.verifyBeforeUpdateEmail(newEmail);
-      await user.sendEmailVerification();
+      try {
+        await user.verifyBeforeUpdateEmail(newEmail);
+        await user.sendEmailVerification();
+        _showMessage('E-mail logowania został zmieniony. Sprawdź swoją skrzynkę pocztową, aby zweryfikować nowy adres e-mail.');
+      } on FirebaseAuthException catch (e) {
+        switch (e.code) {
+          case 'invalid-email':
+            _showMessage('Nieprawidłowy adres e-mail.');
+            break;
+          case 'email-already-in-use':
+            _showMessage('Adres e-mail jest już używany.');
+            break;
+          default:
+            _showMessage('Wystąpił nieznany błąd: ${e.message}');
+        }
+      } catch (e) {
+        _showMessage('Wystąpił błąd: $e');
+      }
     }
   }
 
@@ -58,6 +76,32 @@ class SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _resetPassword(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showMessage('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'invalid-email':
+          _showMessage('Nieprawidłowy adres e-mail.');
+          break;
+        case 'user-not-found':
+          _showMessage('Nie znaleziono użytkownika z tym adresem e-mail.');
+          break;
+        default:
+          _showMessage('Wystąpił nieznany błąd: ${e.message}');
+      }
+    } catch (e) {
+      _showMessage('Wystąpił błąd: $e');
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Future<void> _deleteAccount() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -65,8 +109,269 @@ class SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  void _openDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Column(
+            children: [
+              SvgPicture.asset(
+                'assets/app_logo.svg',
+                height: 80,
+              ),
+              const SizedBox(height: 16),
+              const Text('Usuwanie konta'),
+            ],
+          ),
+          content: const Text('Czy na pewno chcesz usunąć swoje konto?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Anuluj'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _deleteAccount();
+                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+              },
+              child: const Text('Usuń konto'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
+  void _openResetPasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final TextEditingController _resetEmailController = TextEditingController();
+        String _resetErrorMessage = '';
+
+        void _showResetError(String message) {
+          setState(() {
+            _resetErrorMessage = message;
+          });
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  SvgPicture.asset(
+                    'assets/app_logo.svg',
+                    height: 80,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Resetowanie hasła'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Wpisz swój adres e-mail, aby zresetować hasło.'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _resetEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  if (_resetErrorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _resetErrorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Anuluj'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final email = _resetEmailController.text.trim();
+                    if (email.isEmpty) {
+                      setState(() {
+                        _resetErrorMessage = 'Proszę wprowadzić adres e-mail.';
+                      });
+                      return;
+                    }
+                    try {
+                      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                      Navigator.of(context).pop();
+                      _showMessage('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+                    } on FirebaseAuthException catch (e) {
+                      switch (e.code) {
+                        case 'invalid-email':
+                          setState(() {
+                            _resetErrorMessage = 'Nieprawidłowy adres e-mail.';
+                          });
+                          break;
+                        default:
+                          setState(() {
+                            _resetErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
+                          });
+                      }
+                    } catch (e) {
+                      setState(() {
+                        _resetErrorMessage = 'Wystąpił błąd: $e';
+                      });
+                    }
+                  },
+                  child: const Text('Zresetuj hasło'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _openChangeEmailDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final TextEditingController _newEmailController = TextEditingController();
+        final TextEditingController _confirmEmailController = TextEditingController();
+        String _emailErrorMessage = '';
+
+        void _showEmailError(String message) {
+          setState(() {
+            _emailErrorMessage = message;
+          });
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  SvgPicture.asset(
+                    'assets/app_logo.svg',
+                    height: 80,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Zmień adres e-mail'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Wprowadź nowy adres e-mail dwukrotnie, aby go zmienić.'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _newEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nowy e-mail',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _confirmEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Potwierdź nowy e-mail',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  if (_emailErrorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _emailErrorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Anuluj'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final newEmail = _newEmailController.text.trim();
+                    final confirmEmail = _confirmEmailController.text.trim();
+                    if (newEmail.isEmpty || confirmEmail.isEmpty) {
+                      setState(() {
+                        _emailErrorMessage = 'Proszę wprowadzić adres e-mail w obu polach.';
+                      });
+                      return;
+                    }
+                    if (newEmail != confirmEmail) {
+                      setState(() {
+                        _emailErrorMessage = 'Adresy e-mail nie są zgodne.';
+                      });
+                      return;
+                    }
+                    await _changeEmail(newEmail);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Zmień e-mail'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _openSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Column(
+            children: [
+              SvgPicture.asset(
+                'assets/app_logo.svg',
+                height: 80,
+              ),
+              const SizedBox(height: 16),
+              const Text('Wylogowanie'),
+            ],
+          ),
+          content: const Text('Czy na pewno chcesz się wylogować?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Anuluj'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _signOut();
+              },
+              child: const Text('Wyloguj się'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -157,40 +462,19 @@ class SettingsPageState extends State<SettingsPage> {
                 _buildSectionHeader('Ustawienia konta'),
                 ListTile(
                   title: const Text('Zmień email'),
-                  onTap: () async {
-                    final newEmail = await _showInputDialog(context, 'Wprowadź nowy email');
-                    if (newEmail != null) {
-                      await _changeEmail(newEmail);
-                    }
-                  },
+                  onTap: _openChangeEmailDialog,
                 ),
                 ListTile(
                   title: const Text('Zmień hasło'),
-                  onTap: () async {
-                    final newPassword = await _showInputDialog(context, 'Wprowadź nowe hasło');
-                    if (newPassword != null) {
-                      await _changePassword(newPassword);
-                    }
-                  },
+                  onTap: _openResetPasswordDialog,
                 ),
                 ListTile(
                   title: const Text('Usuń konto'),
-                  onTap: () async {
-                    final confirm = await _showConfirmationDialog(context, 'Czy na pewno chcesz usunąć swoje konto?');
-                    if (confirm) {
-                      await _deleteAccount();
-                    }
-                  },
+                  onTap: _openDeleteAccountDialog,
                 ),
                 ListTile(
                   title: const Text('Wyloguj się'),
-                  onTap: () async {
-                    final confirm = await _showConfirmationDialog(context, 'Czy na pewno chcesz się wylogować?');
-                    if (confirm) {
-                      await _signOut();
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    }
-                  },
+                  onTap: _openSignOutDialog,
                 ),
                 const Divider(),
                 _buildSectionHeader('Wsparcie'),
@@ -275,25 +559,34 @@ class SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<bool> _showConfirmationDialog(BuildContext context, String message) async {
+  Future<bool> _showConfirmationDialogWithLogo(BuildContext context, String message) async {
     return await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Confirm'),
+          title: Column(
+            children: [
+              SvgPicture.asset(
+                'assets/app_logo.svg',
+                height: 80,
+              ),
+              const SizedBox(height: 16),
+              const Text('Potwierdzenie'),
+            ],
+          ),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: const Text('Yes'),
+              child: const Text('Tak'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
-              child: const Text('No'),
+              child: const Text('Nie'),
             ),
           ],
         );

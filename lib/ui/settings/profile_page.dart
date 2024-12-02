@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfilePage extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -19,28 +20,247 @@ class ProfilePage extends StatelessWidget {
   }
 
   Future<void> _changeEmail(BuildContext context) async {
-    final newEmail = await _showInputDialog(context, 'Enter new email');
-    if (newEmail != null) {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.verifyBeforeUpdateEmail(newEmail);
-        await user.sendEmailVerification();
-      }
-    }
+    showDialog(
+      context: context,
+      builder: (context) {
+        final TextEditingController _newEmailController = TextEditingController();
+        final TextEditingController _confirmEmailController = TextEditingController();
+        String _emailErrorMessage = '';
+
+        void _showEmailError(String message) {
+          (context as Element).markNeedsBuild();
+          _emailErrorMessage = message;
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  SvgPicture.asset(
+                    'assets/app_logo.svg',
+                    height: 80,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Zmień adres e-mail'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Wprowadź nowy adres e-mail dwukrotnie, aby go zmienić.'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _newEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nowy e-mail',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _confirmEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Potwierdź nowy e-mail',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  if (_emailErrorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _emailErrorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Anuluj'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final newEmail = _newEmailController.text.trim();
+                    final confirmEmail = _confirmEmailController.text.trim();
+                    if (newEmail.isEmpty || confirmEmail.isEmpty) {
+                      setState(() {
+                        _emailErrorMessage = 'Proszę wprowadzić adres e-mail w obu polach.';
+                      });
+                      return;
+                    }
+                    if (newEmail != confirmEmail) {
+                      setState(() {
+                        _emailErrorMessage = 'Adresy e-mail nie są zgodne.';
+                      });
+                      return;
+                    }
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user != null) {
+                      try {
+                        await user.verifyBeforeUpdateEmail(newEmail);
+                        await user.sendEmailVerification();
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('E-mail logowania został zmieniony. Sprawdź swoją skrzynkę pocztową, aby zweryfikować nowy adres e-mail.')),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        switch (e.code) {
+                          case 'invalid-email':
+                            setState(() {
+                              _emailErrorMessage = 'Nieprawidłowy adres e-mail.';
+                            });
+                            break;
+                          case 'email-already-in-use':
+                            setState(() {
+                              _emailErrorMessage = 'Adres e-mail jest już używany.';
+                            });
+                            break;
+                          default:
+                            setState(() {
+                              _emailErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
+                            });
+                        }
+                      } catch (e) {
+                        setState(() {
+                          _emailErrorMessage = 'Wystąpił błąd: $e';
+                        });
+                      }
+                    }
+                  },
+                  child: const Text('Zmień e-mail'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _changePassword(BuildContext context) async {
-    final newPassword = await _showInputDialog(context, 'Enter new password');
-    if (newPassword != null) {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.updatePassword(newPassword);
-      }
-    }
+    showDialog(
+      context: context,
+      builder: (context) {
+        final TextEditingController _newPasswordController = TextEditingController();
+        final TextEditingController _confirmPasswordController = TextEditingController();
+        String _passwordErrorMessage = '';
+
+        void _showPasswordError(String message) {
+          (context as Element).markNeedsBuild();
+          _passwordErrorMessage = message;
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  SvgPicture.asset(
+                    'assets/app_logo.svg',
+                    height: 80,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Zmień hasło'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Wprowadź nowe hasło dwukrotnie, aby je zmienić.'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _newPasswordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nowe hasło',
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Potwierdź nowe hasło',
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                  ),
+                  if (_passwordErrorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _passwordErrorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Anuluj'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final newPassword = _newPasswordController.text.trim();
+                    final confirmPassword = _confirmPasswordController.text.trim();
+                    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+                      setState(() {
+                        _passwordErrorMessage = 'Proszę wprowadzić hasło w obu polach.';
+                      });
+                      return;
+                    }
+                    if (newPassword != confirmPassword) {
+                      setState(() {
+                        _passwordErrorMessage = 'Hasła nie są zgodne.';
+                      });
+                      return;
+                    }
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user != null) {
+                      try {
+                        await user.updatePassword(newPassword);
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Hasło zostało zmienione.')),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        switch (e.code) {
+                          case 'weak-password':
+                            setState(() {
+                              _passwordErrorMessage = 'Hasło jest zbyt słabe.';
+                            });
+                            break;
+                          default:
+                            setState(() {
+                              _passwordErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
+                            });
+                        }
+                      } catch (e) {
+                        setState(() {
+                          _passwordErrorMessage = 'Wystąpił błąd: $e';
+                        });
+                      }
+                    }
+                  },
+                  child: const Text('Zmień hasło'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _deleteAccount(BuildContext context) async {
-    final confirm = await _showConfirmationDialog(context, 'Are you sure you want to delete your account?');
+    final confirm = await _showConfirmationDialogWithLogo(context, 'Czy na pewno chcesz usunąć swoje konto?');
     if (confirm) {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -49,50 +269,42 @@ class ProfilePage extends StatelessWidget {
     }
   }
 
-  Future<String?> _showInputDialog(BuildContext context, String title) async {
-    String? input;
-    return showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: TextField(
-            onChanged: (value) {
-              input = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(input);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _signOut(BuildContext context) async {
+    final confirm = await _showConfirmationDialogWithLogo(context, 'Czy na pewno chcesz się wylogować?');
+    if (confirm) {
+      await FirebaseAuth.instance.signOut();
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }
   }
 
-  Future<bool> _showConfirmationDialog(BuildContext context, String message) async {
+  Future<bool> _showConfirmationDialogWithLogo(BuildContext context, String message) async {
     return await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Confirm'),
+          title: Column(
+            children: [
+              SvgPicture.asset(
+                'assets/app_logo.svg',
+                height: 80,
+              ),
+              const SizedBox(height: 16),
+              const Text('Potwierdzenie'),
+            ],
+          ),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: const Text('Yes'),
+              child: const Text('Tak'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
-              child: const Text('No'),
+              child: const Text('Nie'),
             ),
           ],
         );
@@ -188,6 +400,10 @@ class ProfilePage extends StatelessWidget {
             ListTile(
               title: const Text('Usuń konto'),
               onTap: () => _deleteAccount(context),
+            ),
+            ListTile(
+              title: const Text('Wyloguj się'),
+              onTap: () => _signOut(context),
             ),
           ],
         ),

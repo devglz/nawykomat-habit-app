@@ -38,7 +38,12 @@ class _LoginPageState extends State<LoginPage> {
     try {
       User? user = await AuthService().signInWithEmailAndPassword(email, password);
       if (user != null) {
-        Navigator.pushNamed(context, '/home');
+        if (user.emailVerified) {
+          Navigator.pushNamed(context, '/home');
+        } else {
+          _showError('Adres e-mail nie został zweryfikowany. Sprawdź swoją skrzynkę pocztową.');
+          await user.sendEmailVerification();
+        }
       } else {
         _showError('Nieprawidłowy e-mail lub hasło.');
       }
@@ -73,6 +78,136 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       _showError('Wystąpił błąd podczas logowania przez Google: $e');
     }
+  }
+
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      _showError('Proszę wprowadzić adres e-mail.');
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showError('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'invalid-email':
+          _showError('Nieprawidłowy adres e-mail.');
+          break;
+        case 'user-not-found':
+          _showError('Nie znaleziono użytkownika z tym adresem e-mail.');
+          break;
+        default:
+          _showError('Wystąpił nieznany błąd: ${e.message}');
+      }
+    } catch (e) {
+      _showError('Wystąpił błąd: $e');
+    }
+  }
+
+  void _openResetPasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final TextEditingController _resetEmailController = TextEditingController();
+        String _resetErrorMessage = '';
+
+        void _showResetError(String message) {
+          setState(() {
+            _resetErrorMessage = message;
+          });
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  SvgPicture.asset(
+                    'assets/app_logo.svg',
+                    height: 80,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Resetowanie hasła'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Wpisz swój adres e-mail, aby zresetować hasło.'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _resetEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  if (_resetErrorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _resetErrorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Anuluj'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final email = _resetEmailController.text.trim();
+                    if (email.isEmpty) {
+                      setState(() {
+                        _resetErrorMessage = 'Proszę wprowadzić adres e-mail.';
+                      });
+                      return;
+                    }
+                    try {
+                      final userQuery = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+                      if (userQuery.isEmpty) {
+                        setState(() {
+                          _resetErrorMessage = 'Nie znaleziono użytkownika z tym adresem e-mail.';
+                        });
+                        return;
+                      }
+                      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                      Navigator.of(context).pop();
+                      _showError('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+                    } on FirebaseAuthException catch (e) {
+                      switch (e.code) {
+                        case 'invalid-email':
+                          setState(() {
+                            _resetErrorMessage = 'Nieprawidłowy adres e-mail.';
+                          });
+                          break;
+                        default:
+                          setState(() {
+                            _resetErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
+                          });
+                      }
+                    } catch (e) {
+                      setState(() {
+                        _resetErrorMessage = 'Wystąpił błąd: $e';
+                      });
+                    }
+                  },
+                  child: const Text('Zresetuj hasło'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -157,6 +292,13 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     child: const Text(
                       'Nie masz konta? Zarejestruj się',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _openResetPasswordDialog,
+                    child: const Text(
+                      'Nie pamiętasz hasła? Zresetuj je',
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
