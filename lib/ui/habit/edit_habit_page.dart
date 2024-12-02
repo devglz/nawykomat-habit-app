@@ -18,13 +18,13 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
   String _dayArea = 'PORANEK';
   final List<TimeOfDay> _reminders = [];
   final List<bool> _selectedDays = List.generate(7, (index) => true);
-  final List<bool> _selectedMonthDays = List.generate(31, (index) => false);
-  int _intervalDays = 1;
+  final List<String> _weekDays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
+  final TimeOfDay _timeOfDay = TimeOfDay.now();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 1, vsync: this); // Zmiana długości na 1
     _nameController = TextEditingController(text: widget.habit['name']);
     _startDate = widget.habit['startDate'];
     _isCompleted = widget.habit['isCompleted'] ?? false;
@@ -32,17 +32,171 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
     // Tutaj dodać inicjalizację pozostałych pól z danych nawyku
   }
 
+  Widget _buildDailyTab(StateSetter setState) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center, // Wyśrodkuj zawartość
+        children: [
+          const Text(
+            'Wybierz dni tygodnia',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            alignment: WrapAlignment.center, // Wyśrodkuj elementy w Wrap
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: List.generate(7, (index) {
+              return FilterChip(
+                label: Text(_weekDays[index]),
+                selected: _selectedDays[index], // Sprawdzamy, czy dany dzień jest zaznaczony
+                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).primaryColor,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _selectedDays[index] = selected; // Zmiana stanu zaznaczenia dnia
+                  });
+                },
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getRepeatSummary() {
+    final selectedDaysCount = _selectedDays.where((day) => day).length;
+    return 'Codziennie (${selectedDaysCount} dni w tygodniu)';
+  }
+
+  void _showRepeatDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.5, // Zmniejsz szerokość
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Ustawienia powtarzania',
+                          style: TextStyle(
+                            fontSize: 18, // Zmniejsz rozmiar czcionki
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        labelColor: Theme.of(context).primaryColor,
+                        unselectedLabelColor: Colors.grey,
+                        indicator: BoxDecoration(
+                          color: isDarkMode ? Colors.grey[700] : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        tabs: const [
+                          Tab(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Text('Codziennie'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 200, // Zmniejsz wysokość
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          Material(
+                            color: isDarkMode ? Colors.grey[900] : Colors.white,
+                            child: _buildDailyTab(setDialogState),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'ANULUJ',
+                            style: TextStyle(color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {}); // Aktualizuje widok główny
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white, // Dodaj kolor tekstu
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                          child: const Text(
+                            'ZAPISZ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildSectionCard({
     required String title,
     required Widget content,
     IconData? icon,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      color: isDarkMode ? Colors.grey[800] : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -71,12 +225,9 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
     );
   }
 
-  // Skopiuj metody _buildDailyTab, _buildMonthlyTab, _buildIntervalTab, _showRepeatDialog
-  // z AddHabitPage i dostosuj je do potrzeb edycji
-  // ...existing code from AddHabitPage...
-
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edytuj Nawyk'),
@@ -106,11 +257,12 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
                   decoration: InputDecoration(
                     labelText: 'Nazwa nawyku',
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
+                  style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                 ),
               ),
               _buildSectionCard(
@@ -161,7 +313,7 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
                       decoration: InputDecoration(
                         labelText: 'Pora dnia',
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -177,6 +329,7 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
                           _dayArea = value!;
                         });
                       },
+                      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                     ),
                   ],
                 ),
@@ -305,25 +458,5 @@ class _EditHabitPageState extends State<EditHabitPage> with SingleTickerProvider
     setState(() {
       // Użyj _errorMessage, aby wyświetlić błąd
     });
-  }
-
-  String _getRepeatSummary() {
-    // Skopiuj implementację z AddHabitPage
-    switch (_tabController.index) {
-      case 0:
-        final selectedDaysCount = _selectedDays.where((day) => day).length;
-        return 'Codziennie ($selectedDaysCount dni w tygodniu)';
-      case 1:
-        final selectedMonthDaysCount = _selectedMonthDays.where((day) => day).length;
-        return 'Miesięcznie ($selectedMonthDaysCount dni)';
-      case 2:
-        return 'Co $_intervalDays dni';
-      default:
-        return 'Nie wybrano';
-    }
-  }
-
-  void _showRepeatDialog() {
-    // Implementacja dialogu powtarzania
   }
 }

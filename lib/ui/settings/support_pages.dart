@@ -10,8 +10,8 @@ class ContactPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kontakt'),
-        backgroundColor: Colors.yellowAccent,
+        title: const Text('Kontakt', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF6750A4),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -106,8 +106,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Opinie'),
-        backgroundColor: Colors.yellowAccent,
+        title: const Text('Opinie', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF6750A4),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -187,8 +187,8 @@ class PrivacyPolicyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Polityka Prywatności'),
-        backgroundColor: Colors.yellowAccent,
+        title: const Text('Polityka Prywatności', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF6750A4),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -302,8 +302,8 @@ class AboutAppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('O aplikacji'),
-        backgroundColor: Colors.yellowAccent,
+        title: const Text('O aplikacji', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF6750A4),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

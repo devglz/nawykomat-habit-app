@@ -18,15 +18,13 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
   final List<TimeOfDay> _reminders = [];
   late TabController _tabController;
   final List<bool> _selectedDays = List.generate(7, (index) => true);
-  final List<bool> _selectedMonthDays = List.generate(31, (index) => false);
-  int _intervalDays = 1;
   final List<String> _weekDays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
   final TimeOfDay _timeOfDay = TimeOfDay.now();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 1, vsync: this); // Zmiana długości na 1
   }
 
   @override
@@ -83,109 +81,34 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
   }
 
   Widget _buildDailyTab(StateSetter setState) {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Wybierz dni tygodnia',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: List.generate(7, (index) {
-            return FilterChip(
-              label: Text(_weekDays[index]),
-              selected: _selectedDays[index], // Sprawdzamy, czy dany dzień jest zaznaczony
-              selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-              checkmarkColor: Theme.of(context).primaryColor,
-              onSelected: (bool selected) {
-                setState(() {
-                  _selectedDays[index] = selected; // Zmiana stanu zaznaczenia dnia
-                });
-              },
-            );
-          }),
-        ),
-      ],
-    ),
-  );
-}
-
-
-  Widget _buildMonthlyTab(StateSetter setState) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center, // Wyśrodkuj zawartość
         children: [
           const Text(
-            'Wybierz dni miesiąca',
+            'Wybierz dni tygodnia',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: List.generate(31, (index) {
-                  return FilterChip(
-                    label: Text('${index + 1}'),
-                    selected: _selectedMonthDays[index],
-                    selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                    checkmarkColor: Theme.of(context).primaryColor,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _selectedMonthDays[index] = selected;
-                      });
-                    },
-                  );
-                }),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIntervalTab(StateSetter setState) { // Dodaj parametr setState
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Wybierz interwał',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Powtarzaj co'),
-              const SizedBox(width: 16),
-              DropdownButton<int>(
-                value: _intervalDays,
-                items: List.generate(20, (index) => index + 1)
-                    .map((days) => DropdownMenuItem(
-                          value: days,
-                          child: Text('$days'),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() { // Użyj przekazanego setState
-                    _intervalDays = value!;
+          Wrap(
+            alignment: WrapAlignment.center, // Wyśrodkuj elementy w Wrap
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: List.generate(7, (index) {
+              return FilterChip(
+                label: Text(_weekDays[index]),
+                selected: _selectedDays[index], // Sprawdzamy, czy dany dzień jest zaznaczony
+                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).primaryColor,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _selectedDays[index] = selected; // Zmiana stanu zaznaczenia dnia
                   });
                 },
-              ),
-              const SizedBox(width: 16),
-              const Text('dni'),
-            ],
+              );
+            }),
           ),
         ],
       ),
@@ -193,29 +116,21 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
   }
 
   String _getRepeatSummary() {
-    switch (_tabController.index) {
-      case 0:
-        final selectedDaysCount = _selectedDays.where((day) => day).length;
-        return 'Codziennie (${selectedDaysCount} dni w tygodniu)';
-      case 1:
-        final selectedMonthDaysCount = _selectedMonthDays.where((day) => day).length;
-        return 'Miesięcznie (${selectedMonthDaysCount} dni)';
-      case 2:
-        return 'Co ${_intervalDays} dni';
-      default:
-        return 'Nie wybrano';
-    }
+    final selectedDaysCount = _selectedDays.where((day) => day).length;
+    return 'Codziennie (${selectedDaysCount} dni w tygodniu)';
   }
 
   void _showRepeatDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
+              backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
               child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
+                width: MediaQuery.of(context).size.width * 0.5, // Zmniejsz szerokość
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -226,7 +141,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                         const Text(
                           'Ustawienia powtarzania',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18, // Zmniejsz rozmiar czcionki
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -239,7 +154,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                     const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: TabBar(
@@ -247,7 +162,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                         labelColor: Theme.of(context).primaryColor,
                         unselectedLabelColor: Colors.grey,
                         indicator: BoxDecoration(
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.grey[700] : Colors.white,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         tabs: const [
@@ -257,38 +172,18 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                               child: Text('Codziennie'),
                             ),
                           ),
-                          Tab(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Text('Miesięcznie'),
-                            ),
-                          ),
-                          Tab(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Text('Interwał'),
-                            ),
-                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
-                      height: 250,
+                      height: 200, // Zmniejsz wysokość
                       child: TabBarView(
                         controller: _tabController,
                         children: [
                           Material(
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.grey[900] : Colors.white,
                             child: _buildDailyTab(setDialogState),
-                          ),
-                          Material(
-                            color: Colors.white,
-                            child: _buildMonthlyTab(setDialogState),
-                          ),
-                          Material(
-                            color: Colors.white,
-                            child: _buildIntervalTab(setDialogState), // Przekaż setDialogState
                           ),
                         ],
                       ),
@@ -342,12 +237,14 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
     required Widget content,
     IconData? icon,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      color: isDarkMode ? Colors.grey[800] : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -426,7 +323,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                       contentPadding: EdgeInsets.zero,
                       title: const Text('Data rozpoczęcia'),
                       subtitle: Text(_startDate != null
-                          ? '${_startDate!.toDate().toLocal().toString().split(' ')[0]}'
+                          ? _startDate!.toDate().toLocal().toString().split(' ')[0]
                           : 'Wybierz datę'),
                       trailing: IconButton(
                         icon: const Icon(Icons.calendar_today),
