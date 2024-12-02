@@ -6,6 +6,7 @@ import 'package:habit_app/ui/news/news_page.dart';
 import 'package:habit_app/ui/progress/progress_page.dart';
 import 'package:habit_app/ui/settings/settings_page.dart';
 import 'package:habit_app/ui/habit/edit_habit_page.dart'; // Dodaj import
+import 'package:habit_app/services/auth_service.dart'; // Dodaj import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,6 +31,16 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nawykomat'),
+        automaticallyImplyLeading: false, // Usuń strzałkę po lewej stronie
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await AuthService().signOut();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
       ),
       body: _pages[_currentIndex],
       floatingActionButton: FloatingActionButton(
@@ -57,14 +68,20 @@ class HomePageContent extends StatelessWidget {
       length: 4,
       child: Column(
         children: [
-          const TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(text: 'Wszystkie'),
-              Tab(text: 'Poranek'),
-              Tab(text: 'Południe'),
-              Tab(text: 'Wieczór'),
-            ],
+          Container(
+            color: Theme.of(context).primaryColor,
+            child: const TabBar(
+              indicatorColor: Colors.white,
+              indicatorWeight: 4.0,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              tabs: [
+                Tab(text: 'Wszystkie'),
+                Tab(text: 'Poranek'),
+                Tab(text: 'Południe'),
+                Tab(text: 'Wieczór'),
+              ],
+            ),
           ),
           Expanded(
             child: TabBarView(
