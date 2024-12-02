@@ -40,6 +40,8 @@ class ProgressPageState extends ChangeNotifier {
 
       if (activeHabits > 0) {
         successRate = (todayCompletions / activeHabits) * 100;
+      } else {
+        successRate = 0.0;
       }
 
       // Oblicz statystyki dzienne
@@ -72,6 +74,12 @@ class ProgressPageState extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading statistics: $e');
+      activeHabits = 0;
+      completedHabits = 0;
+      successRate = 0.0;
+      completionsByDay.clear();
+      weeklyProgress.clear();
+      notifyListeners();
     }
   }
 
@@ -81,7 +89,11 @@ class ProgressPageState extends ChangeNotifier {
     const fullDays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
     for (int i = 1; i <= 7; i++) {
       final completionsCount = completionsByDay[i] ?? 0;
-      weeklyProgressPercentage[fullDays[i - 1]] = (completionsCount / activeHabits) * 100;
+      if (activeHabits > 0) {
+        weeklyProgressPercentage[fullDays[i - 1]] = (completionsCount / activeHabits) * 100;
+      } else {
+        weeklyProgressPercentage[fullDays[i - 1]] = 0.0;
+      }
     }
     return weeklyProgressPercentage;
   }
@@ -152,7 +164,7 @@ class ProgressPage extends StatelessWidget {
                     'Najbardziej aktywny dzień: ${state.getMostActiveDayName()}',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40), // Zwiększ odstęp
                   const Text(
                     'Procent wykonania nawyków od stycznia do grudnia',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -311,7 +323,7 @@ class ProgressPage extends StatelessWidget {
                     style: const TextStyle(fontSize: 18),
                   ),
                   Text(
-                    '${progress.toStringAsFixed(1)}%',
+                    '${progress.isNaN ? 0.0 : progress.toStringAsFixed(1)}%',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],

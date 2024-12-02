@@ -39,25 +39,29 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     Timer.periodic(const Duration(seconds: 5), (Timer timer) {
-      if (_currentPage < _pages.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
+      if (_pageController.hasClients) { // Dodano sprawdzenie
+        if (_currentPage < _pages.length - 1) {
+          _currentPage++;
+        } else {
+          _currentPage = 0;
+        }
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
       }
-      _pageController.animateToPage(
-        _currentPage,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
     });
   }
 
   void _onSkip() {
-    _pageController.animateToPage(
-      _pages.length - 1,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (_pageController.hasClients) { // Dodano sprawdzenie
+      _pageController.animateToPage(
+        _pages.length - 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _onPageChanged(int page) {
