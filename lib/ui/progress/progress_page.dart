@@ -46,9 +46,9 @@ class ProgressPageState extends ChangeNotifier {
 
       // Znajdź najbardziej aktywny dzień
       int maxCompletions = 0;
-      completionsByDay.forEach((day, count) {
-        if (count > maxCompletions) {
-          maxCompletions = count;
+      completionsByDay.forEach((day, dayCount) {
+        if (dayCount > maxCompletions) {
+          maxCompletions = dayCount;
           mostActiveDay = day;
         }
       });
@@ -64,7 +64,7 @@ class ProgressPageState extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error loading statistics: $e');
+      debugPrint('Error loading statistics: $e');
     }
   }
 

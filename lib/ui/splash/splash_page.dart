@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // Dodaj import dla SvgPicture
+import 'dart:async'; // Dodaj import dla Timer
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -33,6 +35,23 @@ class _SplashPageState extends State<SplashPage> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    Timer.periodic(const Duration(seconds: 5), (Timer timer) {
+      if (_currentPage < _pages.length - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
+      }
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
   void _onSkip() {
     _pageController.animateToPage(
       _pages.length - 1,
@@ -47,15 +66,24 @@ class _SplashPageState extends State<SplashPage> {
     });
   }
 
-  Widget _buildPageIndicator(bool isActive) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      margin: const EdgeInsets.symmetric(horizontal: 8.0),
-      height: isActive ? 12.0 : 8.0,
-      width: isActive ? 12.0 : 8.0,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.blue : Colors.grey,
-        borderRadius: BorderRadius.circular(12),
+  Widget _buildPageIndicator(bool isActive, int index) {
+    return GestureDetector(
+      onTap: () {
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+        height: isActive ? 16.0 : 12.0, // Powiększ kropki
+        width: isActive ? 16.0 : 12.0, // Powiększ kropki
+        decoration: BoxDecoration(
+          color: isActive ? Colors.blue : Colors.grey,
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }
@@ -76,6 +104,19 @@ class _SplashPageState extends State<SplashPage> {
         ),
         child: Stack(
           children: [
+            Positioned(
+              top: 70,
+              left: 0,
+              right: 0,
+              child: Text(
+                'Nawykomat',
+                style: Theme.of(context).textTheme.displayMedium?.copyWith( // Zmieniono na displayMedium
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ),
             PageView.builder(
               controller: _pageController,
               onPageChanged: _onPageChanged,
@@ -85,6 +126,12 @@ class _SplashPageState extends State<SplashPage> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(height: 50), // Przestrzeń dla napisu "Nawykomat"
+                    SvgPicture.asset(
+                      'assets/app_logo.svg', // Ścieżka do logo SVG
+                      height: 180, // Powiększ logo
+                    ),
+                    const SizedBox(height: 100), // Przesunięcie tytułu na dół
                     Text(
                       page['title']!,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -111,6 +158,18 @@ class _SplashPageState extends State<SplashPage> {
                         onPressed: () {
                           Navigator.pushNamed(context, '/login');
                         },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                          backgroundColor: Colors.orange, // Zmieniono kolor tła
+                          foregroundColor: Colors.white, // Zmieniono kolor tekstu
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
                         child: const Text('Rozpocznij teraz'),
                       ),
                   ],
@@ -136,7 +195,7 @@ class _SplashPageState extends State<SplashPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   _pages.length,
-                  (index) => _buildPageIndicator(index == _currentPage),
+                  (index) => _buildPageIndicator(index == _currentPage, index),
                 ),
               ),
             ),

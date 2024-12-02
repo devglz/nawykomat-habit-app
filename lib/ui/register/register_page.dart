@@ -207,6 +207,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         textAlign: TextAlign.center,
                       ),
                     ),
+                  const SizedBox(height: 15), // Dodaj ten odstęp
                   TextButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/login');

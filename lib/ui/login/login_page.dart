@@ -286,6 +286,7 @@ class _LoginPageState extends State<LoginPage> {
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
+                  const SizedBox(height: 20), // Dodaj ten odstęp
                   TextButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/register');
