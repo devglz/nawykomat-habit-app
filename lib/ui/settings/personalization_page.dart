@@ -41,8 +41,8 @@ class PersonalizationPageState extends State<PersonalizationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Personalizacja'),
-        backgroundColor: Colors.yellowAccent,
+        title: const Text('Personalizacja', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF6750A4),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
