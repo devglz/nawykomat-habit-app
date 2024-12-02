@@ -37,19 +37,19 @@ class CustomBottomNavigationBar extends StatelessWidget {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Nawyki',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.article),
-            label: 'News',
+            label: 'Poradniki',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Progress',
+            label: 'Statystyki',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: 'Ustawienia',
           ),
         ],
       ),

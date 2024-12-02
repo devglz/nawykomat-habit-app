@@ -449,15 +449,6 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       title: Text(userName, style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(userEmail),
-                      trailing: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => ProfilePage(userData: userData)),
-                          );
-                        },
-                        child: const Text('Zobacz'),
-                      ),
                     );
                   },
                 ),

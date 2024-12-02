@@ -151,7 +151,6 @@ class ProfilePage extends StatelessWidget {
 
         void _showPasswordError(String message) {
           (context as Element).markNeedsBuild();
-          _passwordErrorMessage = message;
         }
 
         return StatefulBuilder(

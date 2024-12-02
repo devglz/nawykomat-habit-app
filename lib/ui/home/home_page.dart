@@ -295,7 +295,10 @@ class _HabitCardState extends State<HabitCard> {
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: ListTile(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Powiększenie i pogrubienie nazwy nawyku
+        ),
         subtitle: Text(widget.description),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

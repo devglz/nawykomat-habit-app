@@ -69,8 +69,8 @@ class MyAppWebWrapper extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      width: 1300,
-                      height: 900,
+                      width: 1100,
+                      height: 700,
                       color: Colors.white, // Tło dla głównej aplikacji
                       child: const MyApp(),
                     ),
