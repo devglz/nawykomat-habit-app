@@ -206,4 +206,33 @@ class HabitService {
     }
     return {};
   }
+
+  Future<Map<DateTime, bool>> getMonthlyCompletionStatus(String habitId) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final endOfMonth = DateTime(now.year, now.month + 1, 0);
+
+      final completions = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .doc(habitId)
+          .collection('completions')
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
+          .get();
+
+      Map<DateTime, bool> completionStatus = {};
+      for (var completion in completions.docs) {
+        final date = (completion.data()['date'] as Timestamp).toDate();
+        final dateKey = DateTime(date.year, date.month, date.day);
+        completionStatus[dateKey] = true;
+      }
+
+      return completionStatus;
+    }
+    return {};
+  }
 }

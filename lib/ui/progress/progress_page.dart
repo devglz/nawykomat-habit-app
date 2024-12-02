@@ -30,9 +30,16 @@ class ProgressPageState extends ChangeNotifier {
       activeHabits = activeHabitsCount;
       completedHabits = completions.length;
 
-      // Oblicz procent sukcesu
+      // Oblicz procent sukcesu na podstawie dzisiejszych danych
+      final today = DateTime.now();
+      final todayCompletions = completions.where((completion) {
+        final data = completion.data() as Map<String, dynamic>;
+        final date = (data['updatedAt'] as Timestamp).toDate();
+        return date.year == today.year && date.month == today.month && date.day == today.day;
+      }).length;
+
       if (activeHabits > 0) {
-        successRate = (completedHabits / (activeHabits * 7)) * 100;
+        successRate = (todayCompletions / activeHabits) * 100;
       }
 
       // Oblicz statystyki dzienne
@@ -66,6 +73,17 @@ class ProgressPageState extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading statistics: $e');
     }
+  }
+
+  // Dodaj metodę do obliczania procentowego postępu dla każdego dnia tygodnia
+  Map<String, double> getWeeklyProgressPercentage() {
+    final Map<String, double> weeklyProgressPercentage = {};
+    const days = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+    for (int i = 1; i <= 7; i++) {
+      final completionsCount = completionsByDay[i] ?? 0;
+      weeklyProgressPercentage[days[i - 1]] = (completionsCount / activeHabits) * 100;
+    }
+    return weeklyProgressPercentage;
   }
 
   String getMostActiveDayName() {
@@ -108,7 +126,7 @@ class ProgressPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Podsumowanie ogólne',
+                    'Podsumowanie dzisiaj',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
@@ -126,49 +144,26 @@ class ProgressPage extends StatelessWidget {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  _buildLineChart(state.weeklyProgress),
+                  _buildWeeklyProgressPercentage(state.getWeeklyProgressPercentage()),
+                  const SizedBox(height: 20),
+                  _buildWeeklyBarChart(state.getWeeklyProgressPercentage()),
                   const SizedBox(height: 20),
                   Text(
                     'Najbardziej aktywny dzień: ${state.getMostActiveDayName()}',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Nawyki miesięczne',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildMonthlyHabitCharts(context),
                 ],
               ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildLineChart(List<FlSpot> spots) {
-    return SizedBox(
-      height: 200,
-      child: LineChart(
-        LineChartData(
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: Colors.blue,
-              barWidth: 4,
-              belowBarData: BarAreaData(show: false),
-            ),
-          ],
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-            bottomTitles: AxisTitles(sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                const days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'];
-                if (value >= 0 && value < days.length) {
-                  return Text(days[value.toInt()]);
-                }
-                return const Text('');
-              },
-            )),
-          ),
-        ),
       ),
     );
   }
@@ -193,6 +188,194 @@ class ProgressPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildWeeklyProgressPercentage(Map<String, double> weeklyProgressPercentage) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: weeklyProgressPercentage.entries.map((entry) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                entry.key,
+                style: const TextStyle(fontSize: 18),
+              ),
+              Text(
+                '${entry.value.toStringAsFixed(1)}%',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage) {
+    const days = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+    return SizedBox(
+      height: 300,
+      child: BarChart(
+        BarChartData(
+          maxY: 100,
+          alignment: BarChartAlignment.spaceAround,
+          barGroups: days.asMap().entries.map((entry) {
+            final dayIndex = entry.key;
+            final dayName = entry.value;
+            final progress = weeklyProgressPercentage[dayName] ?? 0.0;
+            return BarChartGroupData(
+              x: dayIndex,
+              barRods: [
+                BarChartRodData(
+                  toY: progress,
+                  color: progress > 0 ? Colors.blue : Colors.transparent,
+                  width: 16,
+                  borderRadius: BorderRadius.circular(4),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: 100,
+                    color: Colors.grey[300],
+                  ),
+                ),
+              ],
+              showingTooltipIndicators: [],
+            );
+          }).toList(),
+          titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                interval: 20,
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  return Text('${value.toInt()}%', style: TextStyle(color: Colors.black));
+                },
+              ),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  if (value >= 0 && value < days.length) {
+                    return Text(days[value.toInt()], style: TextStyle(color: Colors.black));
+                  }
+                  return const Text('');
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          gridData: FlGridData(show: true, drawVerticalLine: false),
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              tooltipPadding: const EdgeInsets.all(8),
+              tooltipMargin: 8,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  '${days[group.x]}: ${rod.toY.toStringAsFixed(1)}%',
+                  TextStyle(color: Colors.white),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMonthlyHabitCharts(BuildContext context) {
+    final habitService = context.read<HabitService>();
+    return FutureBuilder<QuerySnapshot>(
+      future: habitService.getHabits().first,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Text('Brak nawyków do wyświetlenia');
+        }
+
+        final habits = snapshot.data!.docs;
+        return Column(
+          children: habits.map((habit) {
+            final habitData = habit.data() as Map<String, dynamic>;
+            final habitName = habitData['name'] as String;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  habitName,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                _buildMonthlyBarChart(context, habit.id),
+                const SizedBox(height: 20),
+              ],
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildMonthlyBarChart(BuildContext context, String habitId) {
+    return FutureBuilder<Map<DateTime, bool>>(
+      future: context.read<HabitService>().getMonthlyCompletionStatus(habitId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+
+        final now = DateTime.now();
+        final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+        final monthlyStatus = snapshot.data ?? {};
+        final spots = List.generate(daysInMonth, (index) {
+          final day = index + 1;
+          final date = DateTime(now.year, now.month, day);
+          final isCompleted = monthlyStatus[date] ?? false;
+          return FlSpot(day.toDouble(), isCompleted ? 100 : 0);
+        });
+
+        return SizedBox(
+          height: 200,
+          child: LineChart(
+            LineChartData(
+              lineBarsData: [
+                LineChartBarData(
+                  spots: spots,
+                  isCurved: true,
+                  color: Colors.blue,
+                  barWidth: 4,
+                  belowBarData: BarAreaData(show: false),
+                ),
+              ],
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 20,
+                    getTitlesWidget: (value, meta) {
+                      return Text('${value.toInt()}%');
+                    },
+                  ),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      return Text('${value.toInt()}');
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
