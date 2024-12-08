@@ -47,6 +47,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
     if (!mounted) return;
     final habitService = Provider.of<HabitService>(context, listen: false);
     await habitService.saveThemeColor(selectedColor);
+    MyApp.of(context)?.setFontSize(fontSize); // Zapisz rozmiar tekstu do Firebase
   }
 
   void _applyThemeColor(String color) {

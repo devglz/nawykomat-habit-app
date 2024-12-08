@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Dodaj ten import
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:habit_app/ui/splash/splash_page.dart';
 import 'package:habit_app/ui/login/login_page.dart';
 import 'package:habit_app/ui/register/register_page.dart';
@@ -12,23 +12,21 @@ import 'package:habit_app/ui/settings/settings_page.dart';
 import 'package:habit_app/ui/settings/personalization_page.dart';
 import 'package:habit_app/ui/settings/notifications_page.dart';
 import 'firebase_options.dart';
-import 'package:flutter/foundation.dart'; // Import do obsługi kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:habit_app/services/habit_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:habit_app/l10n/l10n.dart'; // Import L10n
-import 'package:cloud_firestore/cloud_firestore.dart'; // Dodaj ten import
+import 'package:habit_app/l10n/l10n.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kIsWeb) {
-    // Inicjalizacja dla platformy webowej
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } else {
-    // Inicjalizacja dla Androida/iOS
     await Firebase.initializeApp(
       name: "habbit-app-86883",
       options: DefaultFirebaseOptions.currentPlatform,
@@ -41,9 +39,8 @@ void main() async {
         Provider<HabitService>(
           create: (_) => HabitService(),
         ),
-        // ...inne provider'y, jeśli są...
       ],
-      child: const MyAppWebWrapper(), // Użycie MyAppWebWrapper
+      child: const MyAppWebWrapper(),
     ),
   );
 }
@@ -74,7 +71,7 @@ class MyAppWebWrapper extends StatelessWidget {
                     child: Container(
                       width: 1100,
                       height: 700,
-                      color: Colors.white, // Tło dla głównej aplikacji
+                      color: Colors.white,
                       child: const MyApp(),
                     ),
                   ),
@@ -96,21 +93,25 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.light; // Ustaw domyślnie jasny motyw
-  Color _themeColor = const Color(0xFF6750A4); // Domyślny fioletowy kolor
-  Locale _locale = const Locale('pl'); // Domyślny język polski
+  ThemeMode _themeMode = ThemeMode.light;
+  Color _themeColor = const Color(0xFF6750A4);
+  Locale _locale = const Locale('pl');
+  double _fontSize = 16.0;
 
   Locale get locale => _locale;
+  double get fontSize => _fontSize;
 
   @override
   void initState() {
     super.initState();
     _initializeTheme();
-    _initializeLocale(); // Dodaj inicjalizację języka
+    _initializeLocale();
+    _initializeFontSize();
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
         _initializeTheme();
-        _initializeLocale(); // Dodaj inicjalizację języka
+        _initializeLocale();
+        _initializeFontSize();
       }
     });
   }
@@ -130,18 +131,18 @@ class MyAppState extends State<MyApp> {
         final colorString = await habitService.getThemeColor();
         if (colorString != null) {
           debugPrint('Ustawiam kolor motywu: $colorString');
-          setThemeColor(_colorFromString(colorString)); // Załaduj kolor z bazy
+          setThemeColor(_colorFromString(colorString));
         } else {
           debugPrint('Brak koloru w bazie danych, używam domyślnego koloru');
-          setThemeColor(const Color(0xFF6750A4)); // Domyślny fioletowy
+          setThemeColor(const Color(0xFF6750A4));
         }
       } catch (e) {
         debugPrint('Błąd podczas inicjalizacji motywu: $e');
-        setThemeColor(const Color(0xFF6750A4)); // Domyślny fioletowy
+        setThemeColor(const Color(0xFF6750A4));
       }
     } else {
       debugPrint('Użytkownik nie jest zalogowany, używam domyślnego koloru');
-      setThemeColor(const Color(0xFF6750A4)); // Domyślny fioletowy
+      setThemeColor(const Color(0xFF6750A4));
     }
   }
 
@@ -162,6 +163,23 @@ class MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _initializeFontSize() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          final fontSize = doc.data()?['fontSize'] as double?;
+          if (fontSize != null) {
+            setFontSize(fontSize);
+          }
+        }
+      } catch (e) {
+        debugPrint('Błąd podczas inicjalizacji rozmiaru tekstu: $e');
+      }
+    }
+  }
+
   void setThemeMode(ThemeMode themeMode) {
     setState(() {
       _themeMode = themeMode;
@@ -178,7 +196,14 @@ class MyAppState extends State<MyApp> {
     setState(() {
       _locale = locale;
     });
-    _saveLocaleToFirebase(locale.languageCode); // Zapisz język do Firebase
+    _saveLocaleToFirebase(locale.languageCode);
+  }
+
+  void setFontSize(double fontSize) {
+    setState(() {
+      _fontSize = fontSize;
+    });
+    _saveFontSizeToFirebase(fontSize);
   }
 
   Future<void> _saveLocaleToFirebase(String languageCode) async {
@@ -194,8 +219,21 @@ class MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _saveFontSizeToFirebase(double fontSize) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'fontSize': fontSize,
+        });
+      } catch (e) {
+        debugPrint('Błąd podczas zapisywania rozmiaru tekstu do Firebase: $e');
+      }
+    }
+  }
+
   Color _colorFromString(String colorString) {
-    switch (colorString.toLowerCase()) { // Dodaj obsługę małych i dużych liter
+    switch (colorString.toLowerCase()) {
       case 'niebieski':
         return Colors.blue;
       case 'zielony':
@@ -215,7 +253,7 @@ class MyAppState extends State<MyApp> {
       case 'limonkowy':
         return Colors.lime;
       default:
-        return const Color(0xFF6750A4); // Domyślny fioletowy kolor
+        return const Color(0xFF6750A4);
     }
   }
 
@@ -224,17 +262,41 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Nawykomat',
-      theme: ThemeData.light().copyWith(primaryColor: _themeColor),
-      darkTheme: ThemeData.dark().copyWith(primaryColor: _themeColor),
-      themeMode: _themeMode, // Użyj zmiennej _themeMode
+      theme: ThemeData.light().copyWith(
+        primaryColor: _themeColor,
+        textTheme: ThemeData.light().textTheme.copyWith(
+          bodyLarge: TextStyle(fontSize: _fontSize),
+          bodyMedium: TextStyle(fontSize: _fontSize),
+          headlineLarge: TextStyle(fontSize: _fontSize * 2),
+          headlineMedium: TextStyle(fontSize: _fontSize * 1.75),
+          headlineSmall: TextStyle(fontSize: _fontSize * 1.5),
+          titleLarge: TextStyle(fontSize: _fontSize * 1.25),
+          titleMedium: TextStyle(fontSize: _fontSize),
+          titleSmall: TextStyle(fontSize: _fontSize * 0.875),
+        ),
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        primaryColor: _themeColor,
+        textTheme: ThemeData.dark().textTheme.copyWith(
+          bodyLarge: TextStyle(fontSize: _fontSize),
+          bodyMedium: TextStyle(fontSize: _fontSize),
+          headlineLarge: TextStyle(fontSize: _fontSize * 2),
+          headlineMedium: TextStyle(fontSize: _fontSize * 1.75),
+          headlineSmall: TextStyle(fontSize: _fontSize * 1.5),
+          titleLarge: TextStyle(fontSize: _fontSize * 1.25),
+          titleMedium: TextStyle(fontSize: _fontSize),
+          titleSmall: TextStyle(fontSize: _fontSize * 0.875),
+        ),
+      ),
+      themeMode: _themeMode,
       locale: _locale,
       supportedLocales: [
-        const Locale('en'), // angielski
-        const Locale('pl'), // polski
-        const Locale('de'), // niemiecki
-        const Locale('es'), // hiszpański
-        const Locale('fr'), // francuski
-        const Locale('zh'), // chiński
+        const Locale('en'),
+        const Locale('pl'),
+        const Locale('de'),
+        const Locale('es'),
+        const Locale('fr'),
+        const Locale('zh'),
       ],
       localizationsDelegates: [
         S.delegate,
@@ -259,7 +321,18 @@ class MyAppState extends State<MyApp> {
         final currentRoute = ModalRoute.of(context)?.settings.name;
         if (currentRoute == '/login' || currentRoute == '/register') {
           return Theme(
-            data: ThemeData.light(),
+            data: ThemeData.light().copyWith(
+              textTheme: ThemeData.light().textTheme.copyWith(
+                bodyLarge: TextStyle(fontSize: 16.0),
+                bodyMedium: TextStyle(fontSize: 16.0),
+                headlineLarge: TextStyle(fontSize: 32.0),
+                headlineMedium: TextStyle(fontSize: 28.0),
+                headlineSmall: TextStyle(fontSize: 24.0),
+                titleLarge: TextStyle(fontSize: 20.0),
+                titleMedium: TextStyle(fontSize: 16.0),
+                titleSmall: TextStyle(fontSize: 14.0),
+              ),
+            ),
             child: child!,
           );
         }
@@ -268,3 +341,5 @@ class MyAppState extends State<MyApp> {
     );
   }
 }
+
+
