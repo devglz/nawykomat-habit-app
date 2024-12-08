@@ -1,18 +1,21 @@
 // lib/ui/news/news_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj ten import
 
 class NewsPage extends StatelessWidget {
   const NewsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Dodaj lokalizacje
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Poradniki', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.guides, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
           },
@@ -22,48 +25,48 @@ class NewsPage extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(localizations),
             Expanded(
               child: ListView(
                 children: [
                   _buildGuideCard(
                     context,
-                    title: 'Jak tworzyć dobre nawyki',
-                    subtitle: 'Dowiedz się, jak skutecznie tworzyć i utrzymywać dobre nawyki.',
+                    title: localizations.guideTitle1,
+                    subtitle: localizations.guideSubtitle1,
                     imageUrl: 'assets/images/jak-tworzyc-dobre-nawyki.jpg',
                     thumbnailUrl: 'assets/images/jak-tworzyc-dobre-nawyki.jpg',
                     onTap: () {
-                      _navigateToGuideDetail(context, 'Jak tworzyć dobre nawyki', 'Tworzenie dobrych nawyków wymaga systematyczności i cierpliwości. Oto kilka kroków, które mogą Ci pomóc:\n\n1. Zdefiniuj cel.\n2. Rozpocznij od małych kroków.\n3. Bądź konsekwentny.\n4. Monitoruj postępy.\n5. Nagradzaj się za osiągnięcia.\n\nDodatkowe informacje:\n- Ustal realistyczne cele.\n- Znajdź swoje "dlaczego".\n- Otaczaj się pozytywnymi ludźmi.\n- Celebruj małe sukcesy.\n- Bądź elastyczny i dostosowuj swoje plany.', 'assets/images/jak-tworzyc-dobre-nawyki.jpg');
+                      _navigateToGuideDetail(context, localizations.guideTitle1, localizations.guideContent1, 'assets/images/jak-tworzyc-dobre-nawyki.jpg');
                     },
                   ),
                   _buildGuideCard(
                     context,
-                    title: 'Zarządzanie czasem',
-                    subtitle: 'Porady dotyczące efektywnego zarządzania czasem.',
+                    title: localizations.guideTitle2,
+                    subtitle: localizations.guideSubtitle2,
                     imageUrl: 'assets/images/zarzadzanie-czasem.jpg',
                     thumbnailUrl: 'assets/images/zarzadzanie-czasem.jpg',
                     onTap: () {
-                      _navigateToGuideDetail(context, 'Zarządzanie czasem', 'Efektywne zarządzanie czasem jest kluczowe dla osiągnięcia sukcesu. Oto kilka wskazówek:\n\n1. Planuj swój dzień.\n2. Ustal priorytety.\n3. Unikaj rozpraszaczy.\n4. Deleguj zadania.\n5. Regularnie oceniaj swoje postępy.\n\nDodatkowe informacje:\n- Ustal realistyczne cele.\n- Znajdź swoje "dlaczego".\n- Otaczaj się pozytywnymi ludźmi.\n- Celebruj małe sukcesy.\n- Bądź elastyczny i dostosowuj swoje plany.', 'assets/images/zarzadzanie-czasem.jpg');
+                      _navigateToGuideDetail(context, localizations.guideTitle2, localizations.guideContent2, 'assets/images/zarzadzanie-czasem.jpg');
                     },
                   ),
                   _buildGuideCard(
                     context,
-                    title: 'Motywacja do działania',
-                    subtitle: 'Jak utrzymać motywację do działania na wysokim poziomie.',
+                    title: localizations.guideTitle3,
+                    subtitle: localizations.guideSubtitle3,
                     imageUrl: 'assets/images/motywacja-do-dzialania.jpg',
                     thumbnailUrl: 'assets/images/motywacja-do-dzialania.jpg',
                     onTap: () {
-                      _navigateToGuideDetail(context, 'Motywacja do działania', 'Utrzymanie motywacji do działania może być wyzwaniem. Oto kilka strategii:\n\n1. Ustal realistyczne cele.\n2. Znajdź swoje "dlaczego".\n3. Otaczaj się pozytywnymi ludźmi.\n4. Celebruj małe sukcesy.\n5. Bądź elastyczny i dostosowuj swoje plany.\n\nDodatkowe informacje:\n- Ustal realistyczne cele.\n- Znajdź swoje "dlaczego".\n- Otaczaj się pozytywnymi ludźmi.\n- Celebruj małe sukcesy.\n- Bądź elastyczny i dostosowuj swoje plany.', 'assets/images/motywacja-do-dzialania.jpg');
+                      _navigateToGuideDetail(context, localizations.guideTitle3, localizations.guideContent3, 'assets/images/motywacja-do-dzialania.jpg');
                     },
                   ),
                   _buildGuideCard(
                     context,
-                    title: 'Zdrowe nawyki żywieniowe',
-                    subtitle: 'Porady dotyczące zdrowego odżywiania i nawyków żywieniowych.',
+                    title: localizations.guideTitle4,
+                    subtitle: localizations.guideSubtitle4,
                     imageUrl: 'assets/images/zdrowe-nawyki-zywieniowe.jpg',
                     thumbnailUrl: 'assets/images/zdrowe-nawyki-zywieniowe.jpg',
                     onTap: () {
-                      _navigateToGuideDetail(context, 'Zdrowe nawyki żywieniowe', 'Zdrowe nawyki żywieniowe są kluczowe dla dobrego samopoczucia. Oto kilka wskazówek:\n\n1. Jedz regularnie.\n2. Wybieraj pełnowartościowe produkty.\n3. Unikaj przetworzonej żywności.\n4. Pij dużo wody.\n5. Słuchaj swojego ciała.\n\nDodatkowe informacje:\n- Ustal realistyczne cele.\n- Znajdź swoje "dlaczego".\n- Otaczaj się pozytywnymi ludźmi.\n- Celebruj małe sukcesy.\n- Bądź elastyczny i dostosowuj swoje plany.', 'assets/images/zdrowe-nawyki-zywieniowe.jpg');
+                      _navigateToGuideDetail(context, localizations.guideTitle4, localizations.guideContent4, 'assets/images/zdrowe-nawyki-zywieniowe.jpg');
                     },
                   ),
                 ],
@@ -75,7 +78,7 @@ class NewsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(S localizations) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -84,12 +87,12 @@ class NewsPage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.info, color: Colors.white, size: 40),
-          SizedBox(width: 10),
+          const Icon(Icons.info, color: Colors.white, size: 40),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Witaj w sekcji poradników! Znajdziesz tu najnowsze informacje i porady dotyczące zarządzania nawykami.',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              localizations.guidesHeader,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
         ],
@@ -109,9 +112,9 @@ class NewsPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           child: Image.asset(thumbnailUrl, width: 50, height: 50, fit: BoxFit.cover),
         ),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle),
-        trailing: Icon(Icons.arrow_forward, color: Colors.grey),
+        trailing: const Icon(Icons.arrow_forward, color: Colors.grey),
         onTap: onTap,
       ),
     );
@@ -144,7 +147,7 @@ class GuideDetailPage extends StatelessWidget {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 800),
+          constraints: const BoxConstraints(maxWidth: 800),
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -153,17 +156,17 @@ class GuideDetailPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: kIsWeb
                         ? Image.network(imageUrl, height: 300, fit: BoxFit.cover)
                         : Image.asset(imageUrl, height: 300, fit: BoxFit.cover),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
@@ -174,7 +177,7 @@ class GuideDetailPage extends StatelessWidget {
                           color: Colors.grey.withOpacity(0.5),
                           spreadRadius: 5,
                           blurRadius: 7,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),

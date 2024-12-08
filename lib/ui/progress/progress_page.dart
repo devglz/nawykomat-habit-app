@@ -3,8 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:habit_app/services/habit_service.dart';
-
-
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj ten import
 
 class ProgressPageState extends ChangeNotifier {
   final HabitService _habitService;
@@ -84,9 +83,17 @@ class ProgressPageState extends ChangeNotifier {
   }
 
   // Dodaj metodę do obliczania procentowego postępu dla każdego dnia tygodnia
-  Map<String, double> getWeeklyProgressPercentage() {
+  Map<String, double> getWeeklyProgressPercentage(S localizations) {
     final Map<String, double> weeklyProgressPercentage = {};
-    const fullDays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+    final fullDays = [
+      localizations.monday,
+      localizations.tuesday,
+      localizations.wednesday,
+      localizations.thursday,
+      localizations.friday,
+      localizations.saturday,
+      localizations.sunday
+    ];
     for (int i = 1; i <= 7; i++) {
       final completionsCount = completionsByDay[i] ?? 0;
       if (activeHabits > 0) {
@@ -98,15 +105,15 @@ class ProgressPageState extends ChangeNotifier {
     return weeklyProgressPercentage;
   }
 
-  String getMostActiveDayName() {
+  String getMostActiveDayName(S localizations) {
     switch (mostActiveDay) {
-      case 1: return 'Poniedziałek';
-      case 2: return 'Wtorek';
-      case 3: return 'Środa';
-      case 4: return 'Czwartek';
-      case 5: return 'Piątek';
-      case 6: return 'Sobota';
-      case 7: return 'Niedziela';
+      case 1: return localizations.monday;
+      case 2: return localizations.tuesday;
+      case 3: return localizations.wednesday;
+      case 4: return localizations.thursday;
+      case 5: return localizations.friday;
+      case 6: return localizations.saturday;
+      case 7: return localizations.sunday;
       default: return '';
     }
   }
@@ -117,13 +124,15 @@ class ProgressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Dodaj dostęp do lokalizacji
+
     return ChangeNotifierProvider(
       create: (_) => ProgressPageState(context.read<HabitService>()),
       child: Consumer<ProgressPageState>(
         builder: (context, state, _) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Statystyki i postępy', style: TextStyle(color: Colors.white)),
+              title: Text(localizations.progressTitle, style: TextStyle(color: Colors.white)),
               backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -137,40 +146,40 @@ class ProgressPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Podsumowanie dzisiaj',
+                  Text(
+                    localizations.summaryToday,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildStatisticCard('Aktywne nawyki', state.activeHabits.toString()),
-                      _buildStatisticCard('Ukończone zadania', state.completedHabits.toString()),
-                      _buildStatisticCard('Procent sukcesu', '${state.successRate.toStringAsFixed(1)}%'),
+                      _buildStatisticCard(localizations.activeHabits, state.activeHabits.toString()),
+                      _buildStatisticCard(localizations.completedTasks, state.completedHabits.toString()),
+                      _buildStatisticCard(localizations.successRate, '${state.successRate.toStringAsFixed(1)}%'),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Postęp tygodniowy',
+                  Text(
+                    localizations.weeklyProgress,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  _buildWeeklyProgressPercentage(state.getWeeklyProgressPercentage()),
+                  _buildWeeklyProgressPercentage(state.getWeeklyProgressPercentage(localizations)),
                   const SizedBox(height: 20),
-                  _buildWeeklyBarChart(state.getWeeklyProgressPercentage()),
+                  _buildWeeklyBarChart(state.getWeeklyProgressPercentage(localizations), localizations),
                   const SizedBox(height: 20),
                   Text(
-                    'Najbardziej aktywny dzień: ${state.getMostActiveDayName()}',
+                    '${localizations.mostActiveDay}: ${state.getMostActiveDayName(localizations)}',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 40), // Zwiększ odstęp
-                  const Text(
-                    'Procent wykonania nawyków od stycznia do grudnia',
+                  Text(
+                    localizations.habitCompletionPercentage,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  _buildYearlyProgressChart(context),
+                  _buildYearlyProgressChart(context, localizations),
                 ],
               ),
             ),
@@ -233,9 +242,25 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage) {
-    const shortDays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
-    const fullDays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+  Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage, S localizations) {
+    final shortDays = [
+      localizations.mondayShort,
+      localizations.tuesdayShort,
+      localizations.wednesdayShort,
+      localizations.thursdayShort,
+      localizations.fridayShort,
+      localizations.saturdayShort,
+      localizations.sundayShort
+    ];
+    final fullDays = [
+      localizations.monday,
+      localizations.tuesday,
+      localizations.wednesday,
+      localizations.thursday,
+      localizations.friday,
+      localizations.saturday,
+      localizations.sunday
+    ];
     return SizedBox(
       height: 300,
       child: BarChart(
@@ -306,8 +331,21 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildYearlyProgressChart(BuildContext context) {
-    final months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+  Widget _buildYearlyProgressChart(BuildContext context, S localizations) {
+    final months = [
+      localizations.january,
+      localizations.february,
+      localizations.march,
+      localizations.april,
+      localizations.may,
+      localizations.june,
+      localizations.july,
+      localizations.august,
+      localizations.september,
+      localizations.october,
+      localizations.november,
+      localizations.december
+    ];
     final habitService = context.read<HabitService>();
     return FutureBuilder<Map<String, double>>(
       future: habitService.getYearlyCompletionPercentage(),

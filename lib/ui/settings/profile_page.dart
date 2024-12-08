@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj import
 
 class ProfilePage extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -23,13 +24,13 @@ class ProfilePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController _newEmailController = TextEditingController();
-        final TextEditingController _confirmEmailController = TextEditingController();
-        String _emailErrorMessage = '';
+        final TextEditingController newEmailController = TextEditingController();
+        final TextEditingController confirmEmailController = TextEditingController();
+        String emailErrorMessage = '';
 
-        void _showEmailError(String message) {
+        void showEmailError(String message) {
           (context as Element).markNeedsBuild();
-          _emailErrorMessage = message;
+          emailErrorMessage = message;
         }
 
         return StatefulBuilder(
@@ -42,34 +43,34 @@ class ProfilePage extends StatelessWidget {
                     height: 80,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Zmień adres e-mail'),
+                  Text(S.of(context).changeEmail), // Dodaj tłumaczenie
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Wprowadź nowy adres e-mail dwukrotnie, aby go zmienić.'),
+                  Text(S.of(context).enterNewEmailTwice), // Dodaj tłumaczenie
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _newEmailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nowy e-mail',
-                      border: OutlineInputBorder(),
+                    controller: newEmailController,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).newEmail, // Dodaj tłumaczenie
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _confirmEmailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Potwierdź nowy e-mail',
-                      border: OutlineInputBorder(),
+                    controller: confirmEmailController,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).confirmNewEmail, // Dodaj tłumaczenie
+                      border: const OutlineInputBorder(),
                     ),
                   ),
-                  if (_emailErrorMessage.isNotEmpty)
+                  if (emailErrorMessage.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        _emailErrorMessage,
+                        emailErrorMessage,
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -80,21 +81,21 @@ class ProfilePage extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Anuluj'),
+                  child: Text(S.of(context).cancel), // Dodaj tłumaczenie
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final newEmail = _newEmailController.text.trim();
-                    final confirmEmail = _confirmEmailController.text.trim();
+                    final newEmail = newEmailController.text.trim();
+                    final confirmEmail = confirmEmailController.text.trim();
                     if (newEmail.isEmpty || confirmEmail.isEmpty) {
                       setState(() {
-                        _emailErrorMessage = 'Proszę wprowadzić adres e-mail w obu polach.';
+                        emailErrorMessage = S.of(context).enterEmailInBothFields; // Dodaj tłumaczenie
                       });
                       return;
                     }
                     if (newEmail != confirmEmail) {
                       setState(() {
-                        _emailErrorMessage = 'Adresy e-mail nie są zgodne.';
+                        emailErrorMessage = S.of(context).emailsDoNotMatch; // Dodaj tłumaczenie
                       });
                       return;
                     }
@@ -105,33 +106,33 @@ class ProfilePage extends StatelessWidget {
                         await user.sendEmailVerification();
                         Navigator.of(context).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('E-mail logowania został zmieniony. Sprawdź swoją skrzynkę pocztową, aby zweryfikować nowy adres e-mail.')),
+                          SnackBar(content: Text(S.of(context).emailChangedCheckInbox)), // Dodaj tłumaczenie
                         );
                       } on FirebaseAuthException catch (e) {
                         switch (e.code) {
                           case 'invalid-email':
                             setState(() {
-                              _emailErrorMessage = 'Nieprawidłowy adres e-mail.';
+                              emailErrorMessage = S.of(context).invalidEmail; // Dodaj tłumaczenie
                             });
                             break;
                           case 'email-already-in-use':
                             setState(() {
-                              _emailErrorMessage = 'Adres e-mail jest już używany.';
+                              emailErrorMessage = S.of(context).emailAlreadyInUse; // Dodaj tłumaczenie
                             });
                             break;
                           default:
                             setState(() {
-                              _emailErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
+                              emailErrorMessage = '${S.of(context).unknownError}: ${e.message}'; // Dodaj tłumaczenie
                             });
                         }
                       } catch (e) {
                         setState(() {
-                          _emailErrorMessage = 'Wystąpił błąd: $e';
+                          emailErrorMessage = '${S.of(context).error}: $e'; // Dodaj tłumaczenie
                         });
                       }
                     }
                   },
-                  child: const Text('Zmień e-mail'),
+                  child: Text(S.of(context).changeEmail), // Dodaj tłumaczenie
                 ),
               ],
             );
@@ -145,11 +146,11 @@ class ProfilePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController _newPasswordController = TextEditingController();
-        final TextEditingController _confirmPasswordController = TextEditingController();
-        String _passwordErrorMessage = '';
+        final TextEditingController newPasswordController = TextEditingController();
+        final TextEditingController confirmPasswordController = TextEditingController();
+        String passwordErrorMessage = '';
 
-        void _showPasswordError(String message) {
+        void showPasswordError(String message) {
           (context as Element).markNeedsBuild();
         }
 
@@ -163,36 +164,36 @@ class ProfilePage extends StatelessWidget {
                     height: 80,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Zmień hasło'),
+                  Text(S.of(context).changePassword), // Dodaj tłumaczenie
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Wprowadź nowe hasło dwukrotnie, aby je zmienić.'),
+                  Text(S.of(context).enterNewPasswordTwice), // Dodaj tłumaczenie
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _newPasswordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nowe hasło',
-                      border: OutlineInputBorder(),
+                    controller: newPasswordController,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).newPassword, // Dodaj tłumaczenie
+                      border: const OutlineInputBorder(),
                     ),
                     obscureText: true,
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _confirmPasswordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Potwierdź nowe hasło',
-                      border: OutlineInputBorder(),
+                    controller: confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).confirmNewPassword, // Dodaj tłumaczenie
+                      border: const OutlineInputBorder(),
                     ),
                     obscureText: true,
                   ),
-                  if (_passwordErrorMessage.isNotEmpty)
+                  if (passwordErrorMessage.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        _passwordErrorMessage,
+                        passwordErrorMessage,
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -203,21 +204,21 @@ class ProfilePage extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Anuluj'),
+                  child: Text(S.of(context).cancel), // Dodaj tłumaczenie
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final newPassword = _newPasswordController.text.trim();
-                    final confirmPassword = _confirmPasswordController.text.trim();
+                    final newPassword = newPasswordController.text.trim();
+                    final confirmPassword = confirmPasswordController.text.trim();
                     if (newPassword.isEmpty || confirmPassword.isEmpty) {
                       setState(() {
-                        _passwordErrorMessage = 'Proszę wprowadzić hasło w obu polach.';
+                        passwordErrorMessage = S.of(context).enterPasswordInBothFields; // Dodaj tłumaczenie
                       });
                       return;
                     }
                     if (newPassword != confirmPassword) {
                       setState(() {
-                        _passwordErrorMessage = 'Hasła nie są zgodne.';
+                        passwordErrorMessage = S.of(context).passwordsDoNotMatch; // Dodaj tłumaczenie
                       });
                       return;
                     }
@@ -227,28 +228,28 @@ class ProfilePage extends StatelessWidget {
                         await user.updatePassword(newPassword);
                         Navigator.of(context).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Hasło zostało zmienione.')),
+                          SnackBar(content: Text(S.of(context).passwordChanged)), // Dodaj tłumaczenie
                         );
                       } on FirebaseAuthException catch (e) {
                         switch (e.code) {
                           case 'weak-password':
                             setState(() {
-                              _passwordErrorMessage = 'Hasło jest zbyt słabe.';
+                              passwordErrorMessage = S.of(context).weakPassword; // Dodaj tłumaczenie
                             });
                             break;
                           default:
                             setState(() {
-                              _passwordErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
+                              passwordErrorMessage = '${S.of(context).unknownError}: ${e.message}'; // Dodaj tłumaczenie
                             });
                         }
                       } catch (e) {
                         setState(() {
-                          _passwordErrorMessage = 'Wystąpił błąd: $e';
+                          passwordErrorMessage = '${S.of(context).error}: $e'; // Dodaj tłumaczenie
                         });
                       }
                     }
                   },
-                  child: const Text('Zmień hasło'),
+                  child: Text(S.of(context).changePassword), // Dodaj tłumaczenie
                 ),
               ],
             );
@@ -270,16 +271,16 @@ class ProfilePage extends StatelessWidget {
                 height: 80,
               ),
               const SizedBox(height: 16),
-              const Text('Usuwanie konta'),
+              Text(S.of(context).deleteAccount), // Dodaj tłumaczenie
             ],
           ),
-          content: const Text('Czy na pewno chcesz usunąć swoje konto?'),
+          content: Text(S.of(context).confirmDeleteAccount), // Dodaj tłumaczenie
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Anuluj'),
+              child: Text(S.of(context).cancel), // Dodaj tłumaczenie
             ),
             ElevatedButton(
               onPressed: () async {
@@ -293,12 +294,12 @@ class ProfilePage extends StatelessWidget {
                     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Wystąpił błąd podczas usuwania konta: $e')),
+                      SnackBar(content: Text('${S.of(context).errorDeletingAccount}: $e')), // Dodaj tłumaczenie
                     );
                   }
                 }
               },
-              child: const Text('Usuń konto'),
+              child: Text(S.of(context).deleteAccount), // Dodaj tłumaczenie
             ),
           ],
         );
@@ -307,7 +308,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   Future<void> _signOut(BuildContext context) async {
-    final confirm = await _showConfirmationDialogWithLogo(context, 'Czy na pewno chcesz się wylogować?');
+    final confirm = await _showConfirmationDialogWithLogo(context, S.of(context).confirmSignOut); // Dodaj tłumaczenie
     if (confirm) {
       await FirebaseAuth.instance.signOut();
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
@@ -326,7 +327,7 @@ class ProfilePage extends StatelessWidget {
                 height: 80,
               ),
               const SizedBox(height: 16),
-              const Text('Potwierdzenie'),
+              Text(S.of(context).confirmation), // Dodaj tłumaczenie
             ],
           ),
           content: Text(message),
@@ -335,13 +336,13 @@ class ProfilePage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: const Text('Tak'),
+              child: Text(S.of(context).yes), // Dodaj tłumaczenie
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
-              child: const Text('Nie'),
+              child: Text(S.of(context).no), // Dodaj tłumaczenie
             ),
           ],
         );
@@ -351,11 +352,12 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userEmail = userData['email'] ?? 'Nieznany email';
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+    final userEmail = userData['email'] ?? localizations.unknownEmail;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.profile, style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF6750A4),
       ),
       body: Padding(
@@ -369,15 +371,15 @@ class ProfilePage extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  return const Center(child: Text('Wystąpił błąd'));
+                  return Center(child: Text(localizations.error)); // Dodaj tłumaczenie
                 }
-                final userName = snapshot.data ?? 'Nieznane imię';
+                final userName = snapshot.data ?? localizations.unknownName;
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: NetworkImage(userData['profilePictureUrl'] ?? 'https://via.placeholder.com/150'),
                     child: Text(userName.isNotEmpty ? userName[0].toUpperCase() : '?'),
                   ),
-                  title: Text(userName, style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(userEmail),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
@@ -389,9 +391,9 @@ class ProfilePage extends StatelessWidget {
               },
             ),
             const Divider(),
-            _buildSectionHeader('Zakres danych czasowych'),
+            _buildSectionHeader(localizations.timeRange), // Dodaj tłumaczenie
             ListTile(
-              title: const Text('Ten tydzień'),
+              title: Text(localizations.thisWeek), // Dodaj tłumaczenie
               trailing: IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
@@ -400,46 +402,46 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const Divider(),
-            _buildSectionHeader('Szybkie Statystyki użytkownika'),
+            _buildSectionHeader(localizations.quickStats), // Dodaj tłumaczenie
             ListTile(
-              title: const Text('Całkowite godziny pracy'),
-              subtitle: const Text('40 godzin'), // Przykładowa wartość
+              title: Text(localizations.totalWorkHours), // Dodaj tłumaczenie
+              subtitle: const Text('40 hours'), // Przykładowa wartość
             ),
             ListTile(
-              title: const Text('Zadania ukończone'),
-              subtitle: const Text('15 zadań'), // Przykładowa wartość
+              title: Text(localizations.completedTasks), // Dodaj tłumaczenie
+              subtitle: const Text('15 tasks'), // Przykładowa wartość
             ),
             const Divider(),
-            _buildSectionHeader('Wizualizacje graficzne'),
+            _buildSectionHeader(localizations.graphicalVisualizations), // Dodaj tłumaczenie
             // Dodaj tutaj wykresy lub inne wizualizacje
             const Divider(),
-            _buildSectionHeader('Opcje dodatkowe'),
+            _buildSectionHeader(localizations.additionalOptions), // Dodaj tłumaczenie
             ListTile(
-              title: const Text('Metody płatności'),
+              title: Text(localizations.paymentMethods), // Dodaj tłumaczenie
               onTap: () {
                 // Zarządzanie metodami płatności
               },
             ),
             ListTile(
-              title: const Text('Najdłuższa seria'),
-              subtitle: const Text('20 dni'), // Przykładowa wartość
+              title: Text(localizations.longestStreak), // Dodaj tłumaczenie
+              subtitle: const Text('20 days'), // Przykładowa wartość
             ),
             const Divider(),
-            _buildSectionHeader('Ustawienia konta'),
+            _buildSectionHeader(localizations.accountSettings), // Dodaj tłumaczenie
             ListTile(
-              title: const Text('Zmień email'),
+              title: Text(localizations.changeEmail), // Dodaj tłumaczenie
               onTap: () => _changeEmail(context),
             ),
             ListTile(
-              title: const Text('Zmień hasło'),
+              title: Text(localizations.changePassword), // Dodaj tłumaczenie
               onTap: () => _changePassword(context),
             ),
             ListTile(
-              title: const Text('Usuń konto'),
+              title: Text(localizations.deleteAccount), // Dodaj tłumaczenie
               onTap: () => _deleteAccount(context),
             ),
             ListTile(
-              title: const Text('Wyloguj się'),
+              title: Text(localizations.signOut), // Dodaj tłumaczenie
               onTap: () => _signOut(context),
             ),
           ],

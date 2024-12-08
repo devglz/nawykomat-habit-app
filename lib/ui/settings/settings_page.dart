@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:habit_app/main.dart'; // Dodaj ten import
-import 'profile_page.dart';
 import 'personalization_page.dart'; // Dodaj ten import
 import './notifications_page.dart'; // Poprawiony import
 import 'support_pages.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+// Import MyApp
+import 'package:habit_app/l10n/l10n.dart'; // Import L10n
+// Poprawiony import
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -30,8 +31,8 @@ class SettingsPageState extends State<SettingsPage> {
       }
     }
     return {
-      'email': user?.email ?? 'Nieznany email',
-      'name': user?.displayName ?? 'Nieznane imię'
+      'email': user?.email ?? S.of(context).unknownEmail,
+      'name': user?.displayName ?? S.of(context).unknownName
     };
   }
 
@@ -40,10 +41,10 @@ class SettingsPageState extends State<SettingsPage> {
     if (user != null) {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (doc.exists) {
-        return doc.data()?['name'] ?? 'Nieznane imię';
+        return doc.data()?['name'] ?? S.of(context).unknownName;
       }
     }
-    return 'Nieznane imię';
+    return S.of(context).unknownName;
   }
 
   Future<void> _changeEmail(String newEmail) async {
@@ -52,20 +53,22 @@ class SettingsPageState extends State<SettingsPage> {
       try {
         await user.verifyBeforeUpdateEmail(newEmail);
         await user.sendEmailVerification();
-        _showMessage('E-mail logowania został zmieniony. Sprawdź swoją skrzynkę pocztową, aby zweryfikować nowy adres e-mail.');
+        if (mounted) _showMessage(S.of(context).emailChangedCheckInbox);
       } on FirebaseAuthException catch (e) {
-        switch (e.code) {
-          case 'invalid-email':
-            _showMessage('Nieprawidłowy adres e-mail.');
-            break;
-          case 'email-already-in-use':
-            _showMessage('Adres e-mail jest już używany.');
-            break;
-          default:
-            _showMessage('Wystąpił nieznany błąd: ${e.message}');
+        if (mounted) {
+          switch (e.code) {
+            case 'invalid-email':
+              _showMessage(S.of(context).invalidEmail);
+              break;
+            case 'email-already-in-use':
+              _showMessage(S.of(context).emailAlreadyInUse);
+              break;
+            default:
+              _showMessage(S.of(context).unknownError(e.message ?? ''));
+          }
         }
       } catch (e) {
-        _showMessage('Wystąpił błąd: $e');
+        if (mounted) _showMessage(S.of(context).unknownError(e.toString()));
       }
     }
   }
@@ -80,20 +83,22 @@ class SettingsPageState extends State<SettingsPage> {
   Future<void> _resetPassword(String email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      _showMessage('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+      if (mounted) _showMessage(S.of(context).resetPasswordEmailSent);
     } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case 'invalid-email':
-          _showMessage('Nieprawidłowy adres e-mail.');
-          break;
-        case 'user-not-found':
-          _showMessage('Nie znaleziono użytkownika z tym adresem e-mail.');
-          break;
-        default:
-          _showMessage('Wystąpił nieznany błąd: ${e.message}');
+      if (mounted) {
+        switch (e.code) {
+          case 'invalid-email':
+            _showMessage(S.of(context).invalidEmail);
+            break;
+          case 'user-not-found':
+            _showMessage(S.of(context).userNotFound);
+            break;
+          default:
+            _showMessage(S.of(context).unknownError(e.message ?? ''));
+        }
       }
     } catch (e) {
-      _showMessage('Wystąpił błąd: $e');
+      if (mounted) _showMessage(S.of(context).unknownError(e.toString()));
     }
   }
 
@@ -122,23 +127,25 @@ class SettingsPageState extends State<SettingsPage> {
                 height: 80,
               ),
               const SizedBox(height: 16),
-              const Text('Usuwanie konta'),
+              Text(S.of(context).deleteAccountTitle),
             ],
           ),
-          content: const Text('Czy na pewno chcesz usunąć swoje konto?'),
+          content: Text(S.of(context).deleteAccountConfirmation),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Anuluj'),
+              child: Text(S.of(context).cancel),
             ),
             ElevatedButton(
               onPressed: () async {
                 await _deleteAccount();
-                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                if (mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                }
               },
-              child: const Text('Usuń konto'),
+              child: Text(S.of(context).deleteAccount),
             ),
           ],
         );
@@ -148,21 +155,17 @@ class SettingsPageState extends State<SettingsPage> {
 
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    if (mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }
   }
 
   void _openResetPasswordDialog() {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController _resetEmailController = TextEditingController();
-        String _resetErrorMessage = '';
-
-        void _showResetError(String message) {
-          setState(() {
-            _resetErrorMessage = message;
-          });
-        }
+        final TextEditingController resetEmailController = TextEditingController();
+        String resetErrorMessage = '';
 
         return StatefulBuilder(
           builder: (context, setState) {
@@ -174,26 +177,26 @@ class SettingsPageState extends State<SettingsPage> {
                     height: 80,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Resetowanie hasła'),
+                  Text(S.of(context).resetPasswordTitle),
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Wpisz swój adres e-mail, aby zresetować hasło.'),
+                  Text(S.of(context).resetPasswordDescription),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _resetEmailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
+                    controller: resetEmailController,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).email,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
-                  if (_resetErrorMessage.isNotEmpty)
+                  if (resetErrorMessage.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        _resetErrorMessage,
+                        resetErrorMessage,
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -204,40 +207,46 @@ class SettingsPageState extends State<SettingsPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Anuluj'),
+                  child: Text(S.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final email = _resetEmailController.text.trim();
+                    final email = resetEmailController.text.trim();
                     if (email.isEmpty) {
                       setState(() {
-                        _resetErrorMessage = 'Proszę wprowadzić adres e-mail.';
+                        resetErrorMessage = S.of(context).enterEmail;
                       });
                       return;
                     }
                     try {
                       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-                      Navigator.of(context).pop();
-                      _showMessage('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                        _showMessage(S.of(context).resetPasswordEmailSent);
+                      }
                     } on FirebaseAuthException catch (e) {
-                      switch (e.code) {
-                        case 'invalid-email':
-                          setState(() {
-                            _resetErrorMessage = 'Nieprawidłowy adres e-mail.';
-                          });
-                          break;
-                        default:
-                          setState(() {
-                            _resetErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
-                          });
+                      if (mounted) {
+                        switch (e.code) {
+                          case 'invalid-email':
+                            setState(() {
+                              resetErrorMessage = S.of(context).invalidEmail;
+                            });
+                            break;
+                          default:
+                            setState(() {
+                              resetErrorMessage = S.of(context).unknownError(e.message ?? '');
+                            });
+                        }
                       }
                     } catch (e) {
-                      setState(() {
-                        _resetErrorMessage = 'Wystąpił błąd: $e';
-                      });
+                      if (mounted) {
+                        setState(() {
+                          resetErrorMessage = S.of(context).unknownError(e.toString());
+                        });
+                      }
                     }
                   },
-                  child: const Text('Zresetuj hasło'),
+                  child: Text(S.of(context).resetPassword),
                 ),
               ],
             );
@@ -251,15 +260,9 @@ class SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController _newEmailController = TextEditingController();
-        final TextEditingController _confirmEmailController = TextEditingController();
-        String _emailErrorMessage = '';
-
-        void _showEmailError(String message) {
-          setState(() {
-            _emailErrorMessage = message;
-          });
-        }
+        final TextEditingController newEmailController = TextEditingController();
+        final TextEditingController confirmEmailController = TextEditingController();
+        String emailErrorMessage = '';
 
         return StatefulBuilder(
           builder: (context, setState) {
@@ -271,34 +274,34 @@ class SettingsPageState extends State<SettingsPage> {
                     height: 80,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Zmień adres e-mail'),
+                  Text(S.of(context).changeEmailTitle),
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Wprowadź nowy adres e-mail dwukrotnie, aby go zmienić.'),
+                  Text(S.of(context).changeEmailDescription),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _newEmailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nowy e-mail',
-                      border: OutlineInputBorder(),
+                    controller: newEmailController,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).newEmail,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _confirmEmailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Potwierdź nowy e-mail',
-                      border: OutlineInputBorder(),
+                    controller: confirmEmailController,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).confirmNewEmail,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
-                  if (_emailErrorMessage.isNotEmpty)
+                  if (emailErrorMessage.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        _emailErrorMessage,
+                        emailErrorMessage,
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -309,28 +312,28 @@ class SettingsPageState extends State<SettingsPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Anuluj'),
+                  child: Text(S.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final newEmail = _newEmailController.text.trim();
-                    final confirmEmail = _confirmEmailController.text.trim();
+                    final newEmail = newEmailController.text.trim();
+                    final confirmEmail = confirmEmailController.text.trim();
                     if (newEmail.isEmpty || confirmEmail.isEmpty) {
                       setState(() {
-                        _emailErrorMessage = 'Proszę wprowadzić adres e-mail w obu polach.';
+                        emailErrorMessage = S.of(context).enterEmailInBothFields;
                       });
                       return;
                     }
                     if (newEmail != confirmEmail) {
                       setState(() {
-                        _emailErrorMessage = 'Adresy e-mail nie są zgodne.';
+                        emailErrorMessage = S.of(context).emailsDoNotMatch;
                       });
                       return;
                     }
                     await _changeEmail(newEmail);
-                    Navigator.of(context).pop();
+                    if (mounted) Navigator.of(context).pop();
                   },
-                  child: const Text('Zmień e-mail'),
+                  child: Text(S.of(context).changeEmail),
                 ),
               ],
             );
@@ -352,22 +355,22 @@ class SettingsPageState extends State<SettingsPage> {
                 height: 80,
               ),
               const SizedBox(height: 16),
-              const Text('Wylogowanie'),
+              Text(S.of(context).signOutTitle),
             ],
           ),
-          content: const Text('Czy na pewno chcesz się wylogować?'),
+          content: Text(S.of(context).signOutConfirmation),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Anuluj'),
+              child: Text(S.of(context).cancel),
             ),
             ElevatedButton(
               onPressed: () async {
                 await _signOut();
               },
-              child: const Text('Wyloguj się'),
+              child: Text(S.of(context).signOut),
             ),
           ],
         );
@@ -401,11 +404,32 @@ class SettingsPageState extends State<SettingsPage> {
     MyApp.of(context)?.setThemeColor(themeColor);
   }
 
+  String getFlag(String languageCode) {
+    switch (languageCode) {
+      case 'en':
+        return 'assets/flags/gb.svg';
+      case 'pl':
+        return 'assets/flags/pl.svg';
+      case 'de':
+        return 'assets/flags/de.svg';
+      case 'es':
+        return 'assets/flags/es.svg';
+      case 'fr':
+        return 'assets/flags/fr.svg';
+      case 'zh':
+        return 'assets/flags/cn.svg';
+      default:
+        return 'assets/flags/unknown.svg';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ustawienia', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.settings, style: TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -423,15 +447,15 @@ class SettingsPageState extends State<SettingsPage> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return const Center(child: Text('Wystąpił błąd'));
+              return Center(child: Text(S.of(context).loadingError));
             }
 
             final userData = snapshot.data ?? {};
-            final userEmail = userData['email'] ?? 'Nieznany email';
+            final userEmail = userData['email'] ?? S.of(context).unknownEmail;
 
             return ListView(
               children: [
-                _buildSectionHeader('Profil'),
+                _buildSectionHeader(localizations.profile),
                 FutureBuilder<String>(
                   future: fetchUserName(),
                   builder: (context, snapshot) {
@@ -439,9 +463,9 @@ class SettingsPageState extends State<SettingsPage> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (snapshot.hasError) {
-                      return const Center(child: Text('Wystąpił błąd'));
+                      return Center(child: Text(S.of(context).loadingError));
                     }
-                    final userName = snapshot.data ?? 'Nieznane imię';
+                    final userName = snapshot.data ?? S.of(context).unknownName;
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundImage: NetworkImage(userData['profilePictureUrl'] ?? 'https://via.placeholder.com/150'),
@@ -453,9 +477,9 @@ class SettingsPageState extends State<SettingsPage> {
                   },
                 ),
                 const Divider(),
-                _buildSectionHeader('Ogólne'),
+                _buildSectionHeader(localizations.generalSettings), // Zmieniono na generalSettings
                 ListTile(
-                  title: const Text('Powiadomienia'),
+                  title: Text(localizations.notifications),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -466,7 +490,7 @@ class SettingsPageState extends State<SettingsPage> {
                   },
                 ),
                 ListTile(
-                  title: const Text('Więcej personalizacji'),
+                  title: Text(localizations.morePersonalization),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -477,36 +501,97 @@ class SettingsPageState extends State<SettingsPage> {
                   },
                 ),
                 ListTile(
-                  title: const Text('Tryb ciemny'),
+                  title: Text(localizations.darkMode),
                   trailing: Switch(
                     value: Theme.of(context).brightness == Brightness.dark,
                     onChanged: _toggleDarkMode,
                   ),
                 ),
-                const Divider(),
-                _buildSectionHeader('Ustawienia konta'),
                 ListTile(
-                  title: const Text('Zmień email'),
+                  title: Text(localizations.language),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        getFlag((MyApp.of(context)?.locale ?? S.delegate.supportedLocales.first).languageCode),
+                        width: 24,
+                        height: 24,
+                      ),
+                      Icon(Icons.arrow_forward_ios),
+                    ],
+                  ),
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text(localizations.selectLanguage),
+                          content: Container(
+                            width: double.maxFinite,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(height: 16), // Dodaj odstęp
+                                Center(
+                                  child: Wrap(
+                                    spacing: 10,
+                                    runSpacing: 10,
+                                    alignment: WrapAlignment.center,
+                                    children: S.delegate.supportedLocales.map((locale) {
+                                      final flag = getFlag(locale.languageCode);
+                                      return GestureDetector(
+                                        onTap: () {
+                                          MyApp.of(context)?.setLocale(locale);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SvgPicture.asset(
+                                              flag,
+                                              width: 60,
+                                              height: 60,
+                                            ),
+                                            SizedBox(height: 8),
+                                            Text(locale.languageCode.toUpperCase()),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const Divider(),
+                _buildSectionHeader(localizations.accountSettings), // Zmieniono na accountSettings
+                ListTile(
+                  title: Text(localizations.changeEmail),
                   onTap: _openChangeEmailDialog,
                 ),
                 ListTile(
-                  title: const Text('Zmień hasło'),
+                  title: Text(localizations.changePassword),
                   onTap: _openResetPasswordDialog,
                 ),
                 ListTile(
-                  title: const Text('Usuń konto'),
+                  title: Text(localizations.deleteAccount),
                   onTap: _openDeleteAccountDialog,
                 ),
                 ListTile(
-                  title: const Text('Wyloguj się'),
+                  title: Text(localizations.signOut),
                   onTap: _openSignOutDialog,
                 ),
                 const Divider(),
-                _buildSectionHeader('Wsparcie'),
+                _buildSectionHeader(localizations.support),
                 ListTile(
                   leading: const Icon(Icons.contact_support),
-                  title: const Text('Kontakt'),
-                  subtitle: const Text('Skontaktuj się z naszym zespołem'),
+                  title: Text(localizations.contact),
+                  subtitle: Text(localizations.contactSupportSubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.push(
@@ -517,8 +602,8 @@ class SettingsPageState extends State<SettingsPage> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.feedback),
-                  title: const Text('Opinie'),
-                  subtitle: const Text('Podziel się swoją opinią'),
+                  title: Text(localizations.feedback),
+                  subtitle: Text(localizations.feedbackSubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.push(
@@ -529,8 +614,8 @@ class SettingsPageState extends State<SettingsPage> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.privacy_tip),
-                  title: const Text('Polityka prywatności'),
-                  subtitle: const Text('Informacje o ochronie danych'),
+                  title: Text(localizations.privacyPolicy),
+                  subtitle: Text(localizations.privacyPolicySubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.push(
@@ -541,8 +626,8 @@ class SettingsPageState extends State<SettingsPage> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.info),
-                  title: const Text('O aplikacji'),
-                  subtitle: const Text('Informacje i licencje'),
+                  title: Text(localizations.aboutApp),
+                  subtitle: Text(localizations.aboutAppSubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.push(
@@ -596,7 +681,7 @@ class SettingsPageState extends State<SettingsPage> {
                 height: 80,
               ),
               const SizedBox(height: 16),
-              const Text('Potwierdzenie'),
+              Text(S.of(context).confirmation),
             ],
           ),
           content: Text(message),

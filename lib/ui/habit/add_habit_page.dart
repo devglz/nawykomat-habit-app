@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habit_app/services/habit_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj ten import
 
 class AddHabitPage extends StatefulWidget {
   const AddHabitPage({super.key});
@@ -14,17 +15,46 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
   final bool _isCompleted = false;
   String _errorMessage = '';
   Timestamp? _startDate;
-  String _dayArea = 'PORANEK';
+  String _dayArea = ''; // Initialize as empty string
   final List<TimeOfDay> _reminders = [];
   late TabController _tabController;
   final List<bool> _selectedDays = List.generate(7, (index) => true);
-  final List<String> _weekDays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
+  final List<String> _weekDays = []; // Initialize as empty list
   final TimeOfDay _timeOfDay = TimeOfDay.now();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 1, vsync: this); // Zmiana długości na 1
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeWeekDays(); // Initialize week days
+    _initializeDayArea(); // Initialize day area
+  }
+
+  void _initializeWeekDays() {
+    final localizations = S.of(context);
+    setState(() {
+      _weekDays.addAll([
+        localizations.monday,
+        localizations.tuesday,
+        localizations.wednesday,
+        localizations.thursday,
+        localizations.friday,
+        localizations.saturday,
+        localizations.sunday,
+      ]);
+    });
+  }
+
+  void _initializeDayArea() {
+    final localizations = S.of(context);
+    setState(() {
+      _dayArea = localizations.morning; // Set initial value to localized morning
+    });
   }
 
   @override
@@ -87,8 +117,8 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center, // Wyśrodkuj zawartość
         children: [
-          const Text(
-            'Wybierz dni tygodnia',
+          Text(
+            S.of(context).selectDaysOfWeek,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
@@ -117,7 +147,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
 
   String _getRepeatSummary() {
     final selectedDaysCount = _selectedDays.where((day) => day).length;
-    return 'Codziennie (${selectedDaysCount} dni w tygodniu)';
+    return S.of(context).repeatSummary(selectedDaysCount);
   }
 
   void _showRepeatDialog() {
@@ -138,8 +168,8 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Ustawienia powtarzania',
+                        Text(
+                          S.of(context).repeatSettings,
                           style: TextStyle(
                             fontSize: 18, // Zmniejsz rozmiar czcionki
                             fontWeight: FontWeight.bold,
@@ -165,11 +195,11 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                           color: isDarkMode ? Colors.grey[700] : Colors.white,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        tabs: const [
+                        tabs: [
                           Tab(
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Text('Codziennie'),
+                              child: Text(S.of(context).daily),
                             ),
                           ),
                         ],
@@ -195,7 +225,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Text(
-                            'ANULUJ',
+                            S.of(context).cancel,
                             style: TextStyle(color: Theme.of(context).primaryColor),
                           ),
                         ),
@@ -213,8 +243,8 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                               vertical: 12,
                             ),
                           ),
-                          child: const Text(
-                            'ZAPISZ',
+                          child: Text(
+                            S.of(context).save,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -276,10 +306,11 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final localizations = S.of(context); // Dodaj dostęp do lokalizacji
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dodaj Nawyk'),
+        title: Text(localizations.addHabit),
         elevation: 0,
       ),
       body: Container(
@@ -299,12 +330,12 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildSectionCard(
-                title: 'Podstawowe informacje',
+                title: localizations.basicInfo,
                 icon: Icons.edit,
                 content: TextField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: 'Nazwa nawyku',
+                    labelText: localizations.habitName,
                     filled: true,
                     fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                     border: OutlineInputBorder(
@@ -315,16 +346,16 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                 ),
               ),
               _buildSectionCard(
-                title: 'Harmonogram',
+                title: localizations.schedule,
                 icon: Icons.calendar_today,
                 content: Column(
                   children: [
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Data rozpoczęcia'),
+                      title: Text(localizations.startDate),
                       subtitle: Text(_startDate != null
                           ? _startDate!.toDate().toLocal().toString().split(' ')[0]
-                          : 'Wybierz datę'),
+                          : localizations.selectDate),
                       trailing: IconButton(
                         icon: const Icon(Icons.calendar_today),
                         onPressed: () => _selectDate(context, true),
@@ -332,7 +363,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Powtarzaj'),
+                      title: Text(localizations.repeat),
                       subtitle: Text(_getRepeatSummary()),
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
@@ -343,22 +374,25 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                 ),
               ),
               _buildSectionCard(
-                title: 'Szczegóły wykonania',
+                title: localizations.executionDetails,
                 icon: Icons.access_time,
                 content: Column(
                   children: [
                     DropdownButtonFormField<String>(
                       value: _dayArea,
                       decoration: InputDecoration(
-                        labelText: 'Pora dnia',
+                        labelText: localizations.timeOfDay,
                         filled: true,
                         fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      items: ['PORANEK', 'POŁUDNIE', 'WIECZÓR']
-                          .map((time) => DropdownMenuItem(
+                      items: [
+                        localizations.morning,
+                        localizations.afternoon,
+                        localizations.evening
+                      ].map((time) => DropdownMenuItem(
                                 value: time,
                                 child: Text(time),
                               ))
@@ -374,7 +408,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                 ),
               ),
               _buildSectionCard(
-                title: 'Przypomnienia',
+                title: localizations.reminders,
                 icon: Icons.notifications,
                 content: Column(
                   children: [
@@ -392,7 +426,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                         )),
                     TextButton.icon(
                       icon: const Icon(Icons.add_alarm),
-                      label: const Text('Dodaj przypomnienie'),
+                      label: Text(localizations.addReminder),
                       onPressed: () async {
                         final TimeOfDay? picked = await showTimePicker(
                           context: context,
@@ -421,7 +455,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                         ),
                       ),
                       onPressed: _addHabit,
-                      child: const Text('ZAPISZ'),
+                      child: Text(localizations.save),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -434,7 +468,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                         ),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('ANULUJ'),
+                      child: Text(localizations.cancel),
                     ),
                   ),
                 ],

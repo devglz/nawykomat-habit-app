@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:habit_app/main.dart'; // Dodaj ten import
 import 'package:provider/provider.dart'; // Dodaj ten import
 import 'package:habit_app/services/habit_service.dart';
-
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj import
 
 class PersonalizationPage extends StatefulWidget {
   const PersonalizationPage({super.key});
@@ -15,8 +15,10 @@ class PersonalizationPage extends StatefulWidget {
 class PersonalizationPageState extends State<PersonalizationPage> {
   bool isDarkMode = false;
   double fontSize = 16.0;
-  String selectedColor = 'Fioletowy';
-  final List<String> colorOptions = ['Niebieski', 'Zielony', 'Fioletowy', 'Czerwony', 'Brązowy', 'Czarny', 'Szary', 'Pomarańczowy', 'Różowy', 'Limonkowy'];
+  String selectedColor = 'Purple';
+  final List<String> colorOptions = [
+    'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Black', 'Grey', 'Orange', 'Pink', 'Lime'
+  ];
 
   @override
   void initState() {
@@ -30,7 +32,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
       setState(() {
         isDarkMode = prefs.getBool('darkMode') ?? false;
         fontSize = prefs.getDouble('fontSize') ?? 16.0;
-        selectedColor = prefs.getString('themeColor') ?? 'Fioletowy';
+        selectedColor = prefs.getString('themeColor') ?? 'Purple';
         _applyThemeColor(selectedColor);
       });
     });
@@ -50,35 +52,35 @@ class PersonalizationPageState extends State<PersonalizationPage> {
   void _applyThemeColor(String color) {
     Color themeColor;
     switch (color) {
-      case 'Niebieski':
+      case 'Blue':
         themeColor = Colors.blue;
         break;
-      case 'Zielony':
+      case 'Green':
         themeColor = Colors.green;
         break;
-      case 'Czerwony':
+      case 'Red':
         themeColor = Colors.red;
         break;
-      case 'Brązowy':
+      case 'Brown':
         themeColor = Colors.brown;
         break;
-      case 'Czarny':
+      case 'Black':
         themeColor = Colors.black;
         break;
-      case 'Szary':
+      case 'Grey':
         themeColor = Colors.grey;
         break;
-      case 'Pomarańczowy':
+      case 'Orange':
         themeColor = Colors.orange;
         break;
-      case 'Różowy':
+      case 'Pink':
         themeColor = Colors.pink;
         break;
-      case 'Limonkowy':
+      case 'Lime':
         themeColor = Colors.lime;
         break;
       default:
-        themeColor = const Color(0xFF6750A4); // Fioletowy
+        themeColor = const Color(0xFF6750A4); // Purple
     }
     MyApp.of(context)?.setThemeColor(themeColor);
   }
@@ -90,9 +92,11 @@ class PersonalizationPageState extends State<PersonalizationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Personalizacja', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.personalizationTitle, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -109,14 +113,14 @@ class PersonalizationPageState extends State<PersonalizationPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Wygląd',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    localizations.appearance,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: const Text('Tryb ciemny'),
-                    subtitle: const Text('Zmień schemat kolorów aplikacji'),
+                    title: Text(localizations.darkMode),
+                    subtitle: Text(localizations.darkModeSubtitle),
                     value: isDarkMode,
                     onChanged: (value) {
                       setState(() {
@@ -128,7 +132,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                   ),
                   const Divider(),
                   ListTile(
-                    title: const Text('Rozmiar tekstu'),
+                    title: Text(localizations.textSize),
                     subtitle: Slider(
                       value: fontSize,
                       min: 12.0,
@@ -155,9 +159,9 @@ class PersonalizationPageState extends State<PersonalizationPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Motyw kolorystyczny',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    localizations.themeColor,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -187,13 +191,13 @@ class PersonalizationPageState extends State<PersonalizationPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Układ',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    localizations.layout,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   ListTile(
-                    title: const Text('Kompaktowy widok'),
+                    title: Text(localizations.compactView),
                     trailing: Switch(
                       value: false,
                       onChanged: (value) {
@@ -202,7 +206,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                     ),
                   ),
                   ListTile(
-                    title: const Text('Pokaż etykiety'),
+                    title: Text(localizations.showLabels),
                     trailing: Switch(
                       value: true,
                       onChanged: (value) {

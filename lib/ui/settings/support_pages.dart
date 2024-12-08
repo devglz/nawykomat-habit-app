@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj import
 
 class ContactPage extends StatelessWidget {
   const ContactPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kontakt', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.contact, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: Padding(
@@ -18,27 +20,27 @@ class ContactPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Masz pytania? Skontaktuj się z nami!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              localizations.contactSupportSubtitle,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             _buildContactTile(
               icon: Icons.email,
-              title: 'Email',
+              title: localizations.email,
               subtitle: 'support@nawykomat.pl',
               onTap: () => _launchEmail('support@nawykomat.pl'),
             ),
             _buildContactTile(
               icon: Icons.phone,
-              title: 'Telefon',
+              title: localizations.phone,
               subtitle: '+48 123 456 789',
               onTap: () => _launchPhone('+48123456789'),
             ),
             _buildContactTile(
               icon: Icons.message,
-              title: 'Chat',
-              subtitle: 'Dostępny w godz. 8:00-20:00',
+              title: localizations.chat,
+              subtitle: localizations.chatAvailability,
               onTap: () => _openChat(context),
             ),
           ],
@@ -75,15 +77,16 @@ class ContactPage extends StatelessWidget {
   }
 
   void _openChat(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Chat z supportem'),
-        content: const Text('Funkcja chatu będzie dostępna wkrótce!'),
+        title: Text(localizations.chatWithSupport),
+        content: Text(localizations.chatComingSoon),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(localizations.ok),
           ),
         ],
       ),
@@ -104,9 +107,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Opinie', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.feedback, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: SingleChildScrollView(
@@ -114,9 +119,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Twoja opinia jest dla nas ważna!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              localizations.feedbackSubtitle,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Row(
@@ -136,9 +141,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
             TextField(
               controller: _feedbackController,
               maxLines: 5,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Napisz swoją opinię...',
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: localizations.feedbackHint,
               ),
             ),
             const SizedBox(height: 20),
@@ -149,7 +154,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: _submitFeedback,
-                child: const Text('Wyślij opinię'),
+                child: Text(localizations.submitFeedback),
               ),
             ),
           ],
@@ -159,16 +164,18 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   void _submitFeedback() {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     if (_rating == 0 || _feedbackController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Proszę dodać ocenę i opinię')),
+        SnackBar(content: Text(localizations.feedbackError)),
       );
       return;
     }
     
     // Tu można dodać logikę wysyłania opinii
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dziękujemy za opinię!')),
+      SnackBar(content: Text(localizations.feedbackSuccess)),
     );
     Navigator.pop(context);
   }
@@ -185,77 +192,60 @@ class PrivacyPolicyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Polityka Prywatności', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.privacyPolicy, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
-        children: const [
+        children: [
           Text(
-            'Polityka Prywatności',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            localizations.privacyPolicy,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _PolicySection(
-            title: '1. Wstęp',
-            content: 'Niniejsza Polityka Prywatności określa zasady przetwarzania i ochrony danych osobowych użytkowników aplikacji Nawykomat. Szanujemy Twoją prywatność i zobowiązujemy się do ochrony Twoich danych osobowych.',
-          ),
-          _PolicySection(
-            title: '2. Administrator Danych',
-            content: 'Administratorem Twoich danych osobowych jest Nawykomat Sp. z o.o. z siedzibą w Warszawie, ul. Przykładowa 1, 00-001 Warszawa.',
+            title: localizations.privacyPolicySection1Title,
+            content: localizations.privacyPolicySection1Content,
           ),
           _PolicySection(
-            title: '3. Gromadzone Dane',
-            content: '''Gromadzimy następujące kategorie danych:
-• Dane podstawowe (imię, adres email)
-• Dane o użytkowaniu aplikacji
-• Dane o postępach w realizacji nawyków
-• Dane techniczne urządzenia''',
+            title: localizations.privacyPolicySection2Title,
+            content: localizations.privacyPolicySection2Content,
           ),
           _PolicySection(
-            title: '4. Cel Przetwarzania Danych',
-            content: '''Twoje dane są przetwarzane w celu:
-• Świadczenia usług w ramach aplikacji
-• Personalizacji doświadczeń użytkownika
-• Usprawnienia funkcjonowania aplikacji
-• Komunikacji z użytkownikiem
-• Analiz statystycznych''',
+            title: localizations.privacyPolicySection3Title,
+            content: localizations.privacyPolicySection3Content,
           ),
           _PolicySection(
-            title: '5. Podstawa Prawna',
-            content: '''Przetwarzamy Twoje dane na podstawie:
-• Zgody użytkownika
-• Realizacji umowy
-• Prawnie uzasadnionego interesu administratora
-• Obowiązków prawnych''',
+            title: localizations.privacyPolicySection4Title,
+            content: localizations.privacyPolicySection4Content,
           ),
           _PolicySection(
-            title: '6. Przechowywanie Danych',
-            content: 'Twoje dane są przechowywane na bezpiecznych serwerach z szyfrowaniem. Stosujemy najnowsze technologie zabezpieczeń i regularnie aktualizujemy nasze systemy bezpieczeństwa.',
+            title: localizations.privacyPolicySection5Title,
+            content: localizations.privacyPolicySection5Content,
           ),
           _PolicySection(
-            title: '7. Prawa Użytkownika',
-            content: '''Masz prawo do:
-• Dostępu do swoich danych
-• Sprostowania danych
-• Usunięcia danych
-• Ograniczenia przetwarzania
-• Przenoszenia danych
-• Wniesienia sprzeciwu''',
+            title: localizations.privacyPolicySection6Title,
+            content: localizations.privacyPolicySection6Content,
           ),
           _PolicySection(
-            title: '8. Pliki Cookie',
-            content: 'Używamy plików cookie i podobnych technologii do śledzenia aktywności w naszej aplikacji i przechowywania określonych informacji.',
+            title: localizations.privacyPolicySection7Title,
+            content: localizations.privacyPolicySection7Content,
           ),
           _PolicySection(
-            title: '9. Udostępnianie Danych',
-            content: 'Nie sprzedajemy ani nie udostępniamy Twoich danych osobowych podmiotom trzecim, z wyjątkiem sytuacji opisanych w niniejszej polityce.',
+            title: localizations.privacyPolicySection8Title,
+            content: localizations.privacyPolicySection8Content,
           ),
           _PolicySection(
-            title: '10. Kontakt',
-            content: 'W sprawach związanych z ochroną danych osobowych możesz kontaktować się z nami pod adresem: privacy@nawykomat.pl',
+            title: localizations.privacyPolicySection9Title,
+            content: localizations.privacyPolicySection9Content,
+          ),
+          _PolicySection(
+            title: localizations.privacyPolicySection10Title,
+            content: localizations.privacyPolicySection10Content,
           ),
         ],
       ),
@@ -300,9 +290,11 @@ class AboutAppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('O aplikacji', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.aboutApp, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: SingleChildScrollView(
@@ -317,28 +309,26 @@ class AboutAppPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Nawykomat',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              localizations.appTitle,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
-            const Text('Wersja: 1.0.0'),
+            Text('${localizations.version}: 1.0.0'),
             const SizedBox(height: 20),
-            const Text(
-              'O nas',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              localizations.aboutApp,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Nawykomat to aplikacja stworzona z myślą o pomocy w budowaniu pozytywnych nawyków...',
-            ),
+            Text(localizations.aboutAppDescription),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Dodaj link do strony z licencjami
               },
-              child: const Text('Licencje open source'),
+              child: Text(localizations.openSourceLicenses),
             ),
           ],
         ),
@@ -352,9 +342,11 @@ class SupportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wsparcie', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.support, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -362,7 +354,54 @@ class SupportPage extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Text('Strona wsparcia wkrótce!'),
+        child: Text(localizations.supportTitle),
+      ),
+    );
+  }
+}
+
+class SupportPages extends StatelessWidget {
+  const SupportPages({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = S.of(context); // Dodaj dostęp do lokalizacji
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(localizations.supportTitle),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            title: Text(localizations.contactSupport),
+            subtitle: Text(localizations.contactSupportSubtitle),
+            onTap: () {
+              // ...existing code...
+            },
+          ),
+          ListTile(
+            title: Text(localizations.feedback),
+            subtitle: Text(localizations.feedbackSubtitle),
+            onTap: () {
+              // ...existing code...
+            },
+          ),
+          ListTile(
+            title: Text(localizations.privacyPolicy),
+            subtitle: Text(localizations.privacyPolicySubtitle),
+            onTap: () {
+              // ...existing code...
+            },
+          ),
+          ListTile(
+            title: Text(localizations.aboutApp),
+            subtitle: Text(localizations.aboutAppSubtitle),
+            onTap: () {
+              // ...existing code...
+            },
+          ),
+        ],
       ),
     );
   }

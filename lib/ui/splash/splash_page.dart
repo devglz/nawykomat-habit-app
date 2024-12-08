@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Dodaj import dla SvgPicture
 import 'dart:async'; // Dodaj import dla Timer
+import 'package:habit_app/main.dart'; // Dodaj import dla MyApp
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj import dla S
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -13,27 +15,7 @@ class _SplashPageState extends State<SplashPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<Map<String, String>> _pages = [
-    {
-      'title': 'USTAL SWOJE NAWYKI',
-      'description':
-          'Z łatwością wprowadzaj i modyfikuj nawyki, które pomogą Ci osiągnąć lepszą wersję siebie.',
-    },
-    {
-      'title': 'USTAW PRZYPOMNIENIA',
-      'description':
-          'Dzięki powiadomieniom nie zapomnisz o codziennym kroku w stronę lepszego siebie.',
-    },
-    {
-      'title': 'ŚLEDŹ SWOJE POSTĘPY',
-      'description':
-          'Nasze wykresy i raporty pomogą Ci zobaczyć, jak rozwijasz swoje nawyki.',
-    },
-    {
-      'title': 'GOTOWY DO DZIAŁANIA',
-      'description': 'Jesteś gotowy, aby rozpocząć swoją podróż!',
-    },
-  ];
+  List<Map<String, String>> _pages = [];
 
   @override
   void initState() {
@@ -52,6 +34,54 @@ class _SplashPageState extends State<SplashPage> {
         );
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializePages();
+  }
+
+  void _initializePages() {
+    setState(() {
+      _pages = [
+        {
+          'title': S.of(context).setYourHabits,
+          'description': S.of(context).setYourHabitsDescription,
+        },
+        {
+          'title': S.of(context).setReminders,
+          'description': S.of(context).setRemindersDescription,
+        },
+        {
+          'title': S.of(context).trackProgress,
+          'description': S.of(context).trackProgressDescription,
+        },
+        {
+          'title': S.of(context).readyToGo,
+          'description': S.of(context).readyToGoDescription,
+        },
+      ];
+    });
+  }
+
+  String getFlag(String languageCode) {
+    switch (languageCode) {
+      case 'en':
+        return 'assets/flags/gb.svg';
+      case 'pl':
+        return 'assets/flags/pl.svg';
+      case 'de':
+        return 'assets/flags/de.svg';
+      case 'es':
+        return 'assets/flags/es.svg';
+      case 'fr':
+        return 'assets/flags/fr.svg';
+      case 'zh':
+        return 'assets/flags/cn.svg';
+      default:
+        return 'assets/flags/unknown.svg';
+    }
   }
 
   void _onSkip() {
@@ -113,7 +143,7 @@ class _SplashPageState extends State<SplashPage> {
               left: 0,
               right: 0,
               child: Text(
-                'Nawykomat',
+                S.of(context).appName,
                 style: Theme.of(context).textTheme.displayMedium?.copyWith( // Zmieniono na displayMedium
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -135,7 +165,7 @@ class _SplashPageState extends State<SplashPage> {
                       'assets/app_logo.svg', // Ścieżka do logo SVG
                       height: 180, // Powiększ logo
                     ),
-                    const SizedBox(height: 100), // Przesunięcie tytułu na dół
+                    SizedBox(height: index == _pages.length - 1 ? 40 : 100), // Przesunięcie tytułu na górę na ostatnim ekranie
                     Text(
                       page['title']!,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -173,8 +203,17 @@ class _SplashPageState extends State<SplashPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
+                          elevation: 5, // Dodano cień
+                          shadowColor: Colors.black.withOpacity(0.5), // Kolor cienia
                         ),
-                        child: const Text('Rozpocznij teraz'),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(S.of(context).startNow),
+                            const SizedBox(width: 10),
+                            const Icon(Icons.arrow_forward, size: 24),
+                          ],
+                        ),
                       ),
                   ],
                 );
@@ -182,12 +221,44 @@ class _SplashPageState extends State<SplashPage> {
             ),
             Positioned(
               top: 50,
+              left: 20,
+              child: DropdownButton<Locale>(
+                value: MyApp.of(context)?.locale ?? S.delegate.supportedLocales.first,
+                onChanged: (Locale? newLocale) {
+                  if (newLocale != null) {
+                    setState(() {
+                      MyApp.of(context)?.setLocale(newLocale);
+                    });
+                  }
+                },
+                items: S.delegate.supportedLocales.map<DropdownMenuItem<Locale>>((Locale locale) {
+                  final flag = getFlag(locale.languageCode);
+                  return DropdownMenuItem<Locale>(
+                    value: locale,
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          flag,
+                          width: 24,
+                          height: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(locale.languageCode.toUpperCase(), style: TextStyle(fontSize: 16)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                underline: Container(), // Usunięcie kreski
+              ),
+            ),
+            Positioned(
+              top: 50,
               right: 20,
               child: TextButton(
                 onPressed: _onSkip,
-                child: const Text(
-                  'Pomiń',
-                  style: TextStyle(color: Colors.white),
+                child: Text(
+                  S.of(context).skip,
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),

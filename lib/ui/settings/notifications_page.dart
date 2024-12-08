@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj import
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -14,7 +15,15 @@ class NotificationsPageState extends State<NotificationsPage> {
   bool reminderEnabled = true;
   TimeOfDay reminderTime = const TimeOfDay(hour: 20, minute: 0);
   List<bool> selectedDays = List.generate(7, (_) => true);
-  final List<String> daysOfWeek = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz'];
+  final List<String> daysOfWeek = [
+    S.current.monday,
+    S.current.tuesday,
+    S.current.wednesday,
+    S.current.thursday,
+    S.current.friday,
+    S.current.saturday,
+    S.current.sunday
+  ];
 
   @override
   void initState() {
@@ -72,16 +81,18 @@ class NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Powiadomienia', style: TextStyle(color: Colors.white)),
+        title: Text(localizations.notificationsTitle, style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
       ),
       body: ListView(
         children: [
           _buildSwitchCard(
-            title: 'Powiadomienia push',
-            subtitle: 'Otrzymuj powiadomienia na urządzeniu',
+            title: localizations.pushNotifications,
+            subtitle: localizations.pushNotificationsSubtitle,
             value: pushEnabled,
             onChanged: (value) {
               setState(() {
@@ -91,8 +102,8 @@ class NotificationsPageState extends State<NotificationsPage> {
             },
           ),
           _buildSwitchCard(
-            title: 'Powiadomienia email',
-            subtitle: 'Otrzymuj powiadomienia na email',
+            title: localizations.emailNotifications,
+            subtitle: localizations.emailNotificationsSubtitle,
             value: emailEnabled,
             onChanged: (value) {
               setState(() {
@@ -126,13 +137,15 @@ class NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildReminderCard() {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           SwitchListTile(
-            title: const Text('Przypomnienia codzienne'),
-            subtitle: const Text('Ustaw przypomnienia o nawykach'),
+            title: Text(localizations.dailyReminders),
+            subtitle: Text(localizations.dailyRemindersSubtitle),
             value: reminderEnabled,
             onChanged: (value) {
               setState(() {
@@ -142,7 +155,7 @@ class NotificationsPageState extends State<NotificationsPage> {
             },
           ),
           ListTile(
-            title: const Text('Godzina przypomnienia'),
+            title: Text(localizations.reminderTime),
             trailing: TextButton(
               onPressed: reminderEnabled ? _selectTime : null,
               child: Text(
@@ -157,16 +170,18 @@ class NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildDaysSelectionCard() {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Dni powiadomień',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              localizations.notificationDays,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
           Padding(

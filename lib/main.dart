@@ -15,6 +15,8 @@ import 'firebase_options.dart';
 import 'package:flutter/foundation.dart'; // Import do obsługi kIsWeb
 import 'package:provider/provider.dart';
 import 'package:habit_app/services/habit_service.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:habit_app/l10n/l10n.dart'; // Import L10n
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -95,6 +97,9 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.light; // Ustaw domyślnie jasny motyw
   Color _themeColor = const Color(0xFF6750A4); // Domyślny fioletowy kolor
+  Locale _locale = const Locale('pl'); // Domyślny język polski
+
+  Locale get locale => _locale;
 
   @override
   void initState() {
@@ -105,6 +110,12 @@ class MyAppState extends State<MyApp> {
         _initializeTheme();
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {});
   }
 
   Future<void> _initializeTheme() async {
@@ -143,6 +154,12 @@ class MyAppState extends State<MyApp> {
     });
   }
 
+  void setLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+  }
+
   Color _colorFromString(String colorString) {
     switch (colorString.toLowerCase()) { // Dodaj obsługę małych i dużych liter
       case 'niebieski':
@@ -176,6 +193,21 @@ class MyAppState extends State<MyApp> {
       theme: ThemeData.light().copyWith(primaryColor: _themeColor),
       darkTheme: ThemeData.dark().copyWith(primaryColor: _themeColor),
       themeMode: _themeMode, // Użyj zmiennej _themeMode
+      locale: _locale,
+      supportedLocales: [
+        const Locale('en'), // angielski
+        const Locale('pl'), // polski
+        const Locale('de'), // niemiecki
+        const Locale('es'), // hiszpański
+        const Locale('fr'), // francuski
+        const Locale('zh'), // chiński
+      ],
+      localizationsDelegates: [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashPage(),

@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:habit_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj ten import
+import 'package:habit_app/main.dart'; // Dodaj import dla MyApp
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _errorMessage = '';
@@ -26,12 +28,12 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty) {
-      _showError('Proszę wprowadzić adres e-mail.');
+      _showError(S.of(context).enterEmail);
       return;
     }
 
     if (password.isEmpty) {
-      _showError('Proszę wprowadzić hasło.');
+      _showError(S.of(context).enterPassword);
       return;
     }
 
@@ -39,31 +41,32 @@ class _LoginPageState extends State<LoginPage> {
       User? user = await AuthService().signInWithEmailAndPassword(email, password);
       if (user != null) {
         if (user.emailVerified) {
+          if (!mounted) return;
           Navigator.pushNamed(context, '/home');
         } else {
-          _showError('Adres e-mail nie został zweryfikowany. Sprawdź swoją skrzynkę pocztową.');
+          _showError(S.of(context).emailNotVerified);
           await user.sendEmailVerification();
         }
       } else {
-        _showError('Nieprawidłowy e-mail lub hasło.');
+        _showError(S.of(context).invalidEmailOrPassword);
       }
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'invalid-email':
-          _showError('Nieprawidłowy adres e-mail.');
+          _showError(S.of(context).invalidEmail);
           break;
         case 'user-disabled':
-          _showError('Konto użytkownika zostało wyłączone.');
+          _showError(S.of(context).userDisabled);
           break;
         case 'user-not-found':
         case 'wrong-password':
-          _showError('Nieprawidłowy e-mail lub hasło.');
+          _showError(S.of(context).invalidEmailOrPassword);
           break;
         default:
-          _showError('Wystąpił nieznany błąd: ${e.message}');
+          _showError(S.of(context).unknownError(e.message ?? ''));
       }
     } catch (e) {
-      _showError('Wystąpił błąd: $e');
+      _showError(S.of(context).errorMessage(e.toString()));
     }
   }
 
@@ -71,12 +74,13 @@ class _LoginPageState extends State<LoginPage> {
     try {
       User? user = await AuthService().signInWithGoogle();
       if (user != null) {
+        if (!mounted) return;
         Navigator.pushNamed(context, '/home');
       } else {
-        _showError('Nie udało się zalogować przez Google.');
+        _showError(S.of(context).googleSignInFailed);
       }
     } catch (e) {
-      _showError('Wystąpił błąd podczas logowania przez Google: $e');
+      _showError(S.of(context).googleSignInError(e.toString()));
     }
   }
 
@@ -84,26 +88,26 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text.trim();
 
     if (email.isEmpty) {
-      _showError('Proszę wprowadzić adres e-mail.');
+      _showError(S.of(context).enterEmail);
       return;
     }
 
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      _showError('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+      _showError(S.of(context).resetPasswordEmailSent);
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'invalid-email':
-          _showError('Nieprawidłowy adres e-mail.');
+          _showError(S.of(context).invalidEmail);
           break;
         case 'user-not-found':
-          _showError('Nie znaleziono użytkownika z tym adresem e-mail.');
+          _showError(S.of(context).userNotFound);
           break;
         default:
-          _showError('Wystąpił nieznany błąd: ${e.message}');
+          _showError(S.of(context).unknownError(e.message ?? ''));
       }
     } catch (e) {
-      _showError('Wystąpił błąd: $e');
+      _showError(S.of(context).errorMessage(e.toString()));
     }
   }
 
@@ -111,12 +115,12 @@ class _LoginPageState extends State<LoginPage> {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController _resetEmailController = TextEditingController();
-        String _resetErrorMessage = '';
+        final TextEditingController resetEmailController = TextEditingController();
+        String resetErrorMessage = '';
 
-        void _showResetError(String message) {
+        void showResetError(String message) {
           setState(() {
-            _resetErrorMessage = message;
+            resetErrorMessage = message;
           });
         }
 
@@ -130,26 +134,26 @@ class _LoginPageState extends State<LoginPage> {
                     height: 80,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Resetowanie hasła'),
+                  Text(S.of(context).resetPassword),
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Wpisz swój adres e-mail, aby zresetować hasło.'),
+                  Text(S.of(context).resetPasswordDescription),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _resetEmailController,
-                    decoration: const InputDecoration(
+                    controller: resetEmailController,
+                    decoration: InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  if (_resetErrorMessage.isNotEmpty)
+                  if (resetErrorMessage.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        _resetErrorMessage,
+                        resetErrorMessage,
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -160,47 +164,41 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Anuluj'),
+                  child: Text(S.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final email = _resetEmailController.text.trim();
+                    final email = resetEmailController.text.trim();
                     if (email.isEmpty) {
                       setState(() {
-                        _resetErrorMessage = 'Proszę wprowadzić adres e-mail.';
+                        resetErrorMessage = S.of(context).enterEmail;
                       });
                       return;
                     }
                     try {
-                      final userQuery = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
-                      if (userQuery.isEmpty) {
-                        setState(() {
-                          _resetErrorMessage = 'Nie znaleziono użytkownika z tym adresem e-mail.';
-                        });
-                        return;
-                      }
                       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                      if (!mounted) return;
                       Navigator.of(context).pop();
-                      _showError('E-mail do resetowania hasła został wysłany. Sprawdź swoją skrzynkę pocztową.');
+                      _showError(S.of(context).resetPasswordEmailSent);
                     } on FirebaseAuthException catch (e) {
                       switch (e.code) {
                         case 'invalid-email':
                           setState(() {
-                            _resetErrorMessage = 'Nieprawidłowy adres e-mail.';
+                            resetErrorMessage = S.of(context).invalidEmail;
                           });
                           break;
                         default:
                           setState(() {
-                            _resetErrorMessage = 'Wystąpił nieznany błąd: ${e.message}';
+                            resetErrorMessage = S.of(context).unknownError(e.message ?? '');
                           });
                       }
                     } catch (e) {
                       setState(() {
-                        _resetErrorMessage = 'Wystąpił błąd: $e';
+                        resetErrorMessage = S.of(context).errorMessage(e.toString());
                       });
                     }
                   },
-                  child: const Text('Zresetuj hasło'),
+                  child: Text(S.of(context).resetPassword),
                 ),
               ],
             );
@@ -212,6 +210,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Dodaj dostęp do lokalizacji
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -221,104 +221,147 @@ class _LoginPageState extends State<LoginPage> {
             colors: [Colors.blue, Colors.purple],
           ),
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              constraints: const BoxConstraints(maxWidth: 400),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(10.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 4),
-                    blurRadius: 10.0,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    'assets/app_logo.svg',
-                    height: 80,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Logowanie',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
+        child: Stack(
+          children: [
+            Positioned(
+              top: 20, // Przesuń flagi bardziej do góry
+              left: 20,
+              child: DropdownButton<Locale>(
+                value: MyApp.of(context)?.locale ?? S.delegate.supportedLocales.first,
+                onChanged: (Locale? newLocale) {
+                  if (newLocale != null) {
+                    setState(() {
+                      MyApp.of(context)?.setLocale(newLocale);
+                    });
+                  }
+                },
+                items: S.delegate.supportedLocales.map<DropdownMenuItem<Locale>>((Locale locale) {
+                  final flag = getFlag(locale.languageCode);
+                  return DropdownMenuItem<Locale>(
+                    value: locale,
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          flag,
+                          width: 24,
+                          height: 24,
                         ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
+                        const SizedBox(width: 8),
+                        Text(locale.languageCode.toUpperCase(), style: TextStyle(fontSize: 16)),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Hasło',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _signInWithEmailAndPassword,
-                    child: const Text('Zaloguj się'),
-                  ),
-                  if (_errorMessage.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        _errorMessage,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  const SizedBox(height: 20), // Dodaj ten odstęp
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/register');
-                    },
-                    child: const Text(
-                      'Nie masz konta? Zarejestruj się',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _openResetPasswordDialog,
-                    child: const Text(
-                      'Nie pamiętasz hasła? Zresetuj je',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: _signInWithGoogle,
-                    icon: Image.asset('assets/google_logo.png', height: 24.0),
-                    label: const Text('Zaloguj się przez Google'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                    ),
-                  ),
-                ],
+                  );
+                }).toList(),
+                underline: Container(), // Usunięcie kreski
               ),
             ),
-          ),
+            Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  margin: const EdgeInsets.only(top: 50), // Obniż cały ekran logowania
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10.0),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/app_logo.svg',
+                        height: 80,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        localizations.login,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: localizations.email,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: localizations.password,
+                          border: OutlineInputBorder(),
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _signInWithEmailAndPassword,
+                        child: Text(localizations.signIn),
+                      ),
+                      if (_errorMessage.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+                      TextButton(
+                        onPressed: _openResetPasswordDialog,
+                        child: Text(localizations.forgotPassword),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/register');
+                        },
+                        child: Text(localizations.createAccount),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: _signInWithGoogle,
+                        icon: SvgPicture.asset(
+                          'assets/google_logo.svg',
+                          height: 24,
+                        ),
+                        label: Text(localizations.signInWithGoogle),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  String getFlag(String languageCode) {
+    switch (languageCode) {
+      case 'en':
+        return 'assets/flags/gb.svg';
+      case 'pl':
+        return 'assets/flags/pl.svg';
+      case 'de':
+        return 'assets/flags/de.svg';
+      case 'es':
+        return 'assets/flags/es.svg';
+      case 'fr':
+        return 'assets/flags/fr.svg';
+      case 'zh':
+        return 'assets/flags/cn.svg';
+      default:
+        return 'assets/flags/unknown.svg';
+    }
   }
 }

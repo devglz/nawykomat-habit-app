@@ -1,6 +1,7 @@
 // custom_bottom_navigation_bar.dart
 
 import 'package:flutter/material.dart';
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj ten import
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -18,6 +19,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Dodaj lokalizacje
+
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -34,22 +37,22 @@ class CustomBottomNavigationBar extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: selectedItemColor,
         unselectedItemColor: unselectedItemColor,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Nawyki',
+            label: localizations.habits,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.article),
-            label: 'Poradniki',
+            label: localizations.guides,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Statystyki',
+            label: localizations.statistics,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Ustawienia',
+            label: localizations.settings,
           ),
         ],
       ),

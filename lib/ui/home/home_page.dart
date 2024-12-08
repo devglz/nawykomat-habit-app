@@ -9,12 +9,14 @@ import 'package:habit_app/ui/habit/edit_habit_page.dart'; // Dodaj import
 import 'package:habit_app/services/auth_service.dart'; // Dodaj import
 import 'package:intl/intl.dart'; // Dodaj import
 import 'package:flutter/foundation.dart' show kIsWeb; // Dodaj import
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj import
+import 'package:flutter_localizations/flutter_localizations.dart'; // Dodaj import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -29,6 +31,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return Scaffold(
       appBar: _currentIndex == 0
           ? AppBar(
@@ -45,7 +49,7 @@ class _HomePageState extends State<HomePage> {
                   Center(
                     child: Padding( // Dodaj Padding
                       padding: const EdgeInsets.only(left: 50.0), // Przesuń lekko w lewo
-                      child: const Text('Nawykomat', style: TextStyle(color: Colors.black)),
+                      child: Text(localizations.appTitle, style: const TextStyle(color: Colors.black)),
                     ),
                   ),
                 ],
@@ -89,22 +93,24 @@ class HomePageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+
     return DefaultTabController(
       length: 4,
       child: Column(
         children: [
           Container(
             color: Theme.of(context).primaryColor, // Użyj koloru motywu
-            child: const TabBar(
+            child: TabBar(
               indicatorColor: Colors.white,
               indicatorWeight: 4.0,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white70,
               tabs: [
-                Tab(text: 'Wszystkie'),
-                Tab(text: 'Poranek'),
-                Tab(text: 'Południe'),
-                Tab(text: 'Wieczór'),
+                Tab(text: localizations.all),
+                Tab(text: localizations.morning),
+                Tab(text: localizations.afternoon),
+                Tab(text: localizations.evening),
               ],
             ),
           ),
@@ -128,18 +134,20 @@ class DayAreaPage extends StatelessWidget {
   final String dayArea;
   const DayAreaPage({required this.dayArea, super.key});
 
-  String _getSectionTitle(bool isActive) {
+  String _getSectionTitle(bool isActive, BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
     if (isActive) {
-      return 'Aktywne nawyki ${_getDayAreaText()}';
+      return '${localizations.activeHabits} ${_getDayAreaText(context)}';
     }
-    return 'Ukończone nawyki ${_getDayAreaText()}';
+    return '${localizations.completedHabits} ${_getDayAreaText(context)}';
   }
 
-  String _getDayAreaText() {
+  String _getDayAreaText(BuildContext context) {
+    final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
     switch (dayArea) {
-      case 'PORANEK': return '(poranne)';
-      case 'POŁUDNIE': return '(południowe)';
-      case 'WIECZÓR': return '(wieczorne)';
+      case 'PORANEK': return '(${localizations.morning})';
+      case 'POŁUDNIE': return '(${localizations.afternoon})';
+      case 'WIECZÓR': return '(${localizations.evening})';
       default: return '';
     }
   }
@@ -149,9 +157,9 @@ class DayAreaPage extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          SectionTitle(title: _getSectionTitle(true)),
+          SectionTitle(title: _getSectionTitle(true, context)),
           HabitList(isCompleted: false, dayArea: dayArea),
-          SectionTitle(title: _getSectionTitle(false)),
+          SectionTitle(title: _getSectionTitle(false, context)),
           HabitList(isCompleted: true, dayArea: dayArea),
         ],
       ),
@@ -193,8 +201,8 @@ class HabitList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           print('Error: ${snapshot.error}');
-          return const Center(
-            child: Text('Wystąpił błąd podczas ładowania nawyków'),
+          return Center(
+            child: Text(S.of(context).loadingError), // Dodaj tłumaczenie błędu
           );
         }
 
@@ -224,7 +232,7 @@ class HabitList extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Center(
               child: Text(
-                isCompleted ? 'Brak ukończonych nawyków' : 'Brak aktywnych nawyków',
+                isCompleted ? S.of(context).noCompletedHabits : S.of(context).noActiveHabits, // Dodaj tłumaczenie
                 style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ),
@@ -317,7 +325,7 @@ class _HabitCardState extends State<HabitCard> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          widget.isCompleted ? 'Nawyk oznaczony jako nieukończony' : 'Nawyk ukończony!',
+                          widget.isCompleted ? S.of(context).habitMarkedIncomplete : S.of(context).habitCompleted, // Dodaj tłumaczenie
                         ),
                         duration: const Duration(seconds: 2),
                       ),
@@ -328,7 +336,7 @@ class _HabitCardState extends State<HabitCard> {
                   if (mounted) { // Sprawdź, czy widget jest zamontowany
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Błąd: ${e.toString()}'),
+                        content: Text('${S.of(context).error}: ${e.toString()}'), // Dodaj tłumaczenie
                         backgroundColor: Colors.red,
                         duration: const Duration(seconds: 3),
                       ),
@@ -354,6 +362,23 @@ class _HabitCardState extends State<HabitCard> {
           Navigator.pushNamed(context, '/habitDetail', arguments: widget.habitId);
         },
       ),
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
     );
   }
 }
