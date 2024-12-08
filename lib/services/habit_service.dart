@@ -347,4 +347,18 @@ Future<String?> getThemeColor() async {
 
   return null; // Jeśli nic nie znaleziono, zwróć null
 }
+
+  Future<int> getActiveHabitsCountForDay(int day) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final habitsSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .where('selectedDays', arrayContains: day)
+          .get();
+      return habitsSnapshot.docs.length;
+    }
+    return 0;
+  }
 }

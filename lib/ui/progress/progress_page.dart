@@ -3,7 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:habit_app/services/habit_service.dart';
-import 'package:habit_app/l10n/l10n.dart'; // Dodaj ten import
+import 'package:habit_app/l10n/l10n.dart';
+import 'package:flutter/foundation.dart'; // Dodaj ten import
 
 class ProgressPageState extends ChangeNotifier {
   final HabitService _habitService;
@@ -14,6 +15,7 @@ class ProgressPageState extends ChangeNotifier {
   Map<int, int> completionsByDay = {};
   int mostActiveDay = 1;
   List<FlSpot> weeklyProgress = [];
+  int totalHabits = 0; // Dodaj zmienną do przechowywania liczby wszystkich nawyków
 
   ProgressPageState(this._habitService) {
     _loadStatistics();
@@ -21,8 +23,10 @@ class ProgressPageState extends ChangeNotifier {
 
   Future<void> _loadStatistics() async {
     try {
+      final today = DateTime.now().weekday - 1; // Pobierz dzisiejszy dzień tygodnia (0 - poniedziałek, 1 - wtorek, itd.)
+
       // Pobierz dane asynchronicznie
-      final activeHabitsCount = await _habitService.getActiveHabitsCount();
+      final activeHabitsCount = await _habitService.getActiveHabitsCountForDay(today);
       final completions = await _habitService.getAllCompletions();
 
       // Aktualizuj stan
@@ -30,11 +34,10 @@ class ProgressPageState extends ChangeNotifier {
       completedHabits = completions.length;
 
       // Oblicz procent sukcesu na podstawie dzisiejszych danych
-      final today = DateTime.now();
       final todayCompletions = completions.where((completion) {
         final data = completion.data() as Map<String, dynamic>;
         final date = (data['updatedAt'] as Timestamp).toDate();
-        return date.year == today.year && date.month == today.month && date.day == today.day;
+        return date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
       }).length;
 
       if (activeHabits > 0) {
@@ -70,6 +73,9 @@ class ProgressPageState extends ChangeNotifier {
         weeklyProgress.add(FlSpot(6-i.toDouble(), completionsCount.toDouble()));
       }
 
+      // Pobierz liczbę wszystkich nawyków
+      totalHabits = await _habitService.getActiveHabitsCount();
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading statistics: $e');
@@ -78,6 +84,7 @@ class ProgressPageState extends ChangeNotifier {
       successRate = 0.0;
       completionsByDay.clear();
       weeklyProgress.clear();
+      totalHabits = 0;
       notifyListeners();
     }
   }
@@ -124,7 +131,8 @@ class ProgressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = S.of(context); // Dodaj dostęp do lokalizacji
+    final localizations = S.of(context);
+    final textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
 
     return ChangeNotifierProvider(
       create: (_) => ProgressPageState(context.read<HabitService>()),
@@ -133,7 +141,7 @@ class ProgressPage extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: Text(localizations.progressTitle, style: TextStyle(color: Colors.white)),
-              backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
+              backgroundColor: Theme.of(context).primaryColor,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
@@ -148,38 +156,52 @@ class ProgressPage extends StatelessWidget {
                 children: [
                   Text(
                     localizations.summaryToday,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildStatisticCard(localizations.activeHabits, state.activeHabits.toString()),
-                      _buildStatisticCard(localizations.completedTasks, state.completedHabits.toString()),
-                      _buildStatisticCard(localizations.successRate, '${state.successRate.toStringAsFixed(1)}%'),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final cardWidth = constraints.maxWidth / (kIsWeb ? 4 : 2) - 16; // Zmienna szerokość kart
+
+                      return Center(
+                        child: Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: [
+                            _buildStatisticCard(localizations.activeHabits, state.activeHabits.toString(), textColor, cardWidth),
+                            _buildStatisticCard(localizations.completedTasks, state.completedHabits.toString(), textColor, cardWidth),
+                            _buildStatisticCard(localizations.successRate, '${state.successRate.toStringAsFixed(1)}%', textColor, cardWidth),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   Text(
                     localizations.weeklyProgress,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 10),
-                  _buildWeeklyProgressPercentage(state.getWeeklyProgressPercentage(localizations)),
+                  _buildWeeklyProgressPercentage(state.getWeeklyProgressPercentage(localizations), textColor),
                   const SizedBox(height: 20),
-                  _buildWeeklyBarChart(state.getWeeklyProgressPercentage(localizations), localizations),
+                  _buildWeeklyBarChart(state.getWeeklyProgressPercentage(localizations), localizations, textColor),
                   const SizedBox(height: 20),
                   Text(
                     '${localizations.mostActiveDay}: ${state.getMostActiveDayName(localizations)}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${localizations.totalHabits}: ${state.totalHabits}',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 40), // Zwiększ odstęp
                   Text(
                     localizations.habitCompletionPercentage,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 10),
-                  _buildYearlyProgressChart(context, localizations),
+                  _buildYearlyProgressChart(context, localizations, textColor),
                 ],
               ),
             ),
@@ -189,9 +211,9 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatisticCard(String title, String value) {
+  Widget _buildStatisticCard(String title, String value, Color textColor, double width) {
     return SizedBox(
-      width: 130, // Ustal szerokość kart
+      width: width,
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -203,13 +225,13 @@ class ProgressPage extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), // Zmniejsz rozmiar czcionki
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textColor), // Zmniejsz rozmiar czcionki
               ),
               const SizedBox(height: 10),
               Text(
                 value,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), // Zmniejsz rozmiar czcionki
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor), // Zmniejsz rozmiar czcionki
               ),
             ],
           ),
@@ -218,7 +240,7 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyProgressPercentage(Map<String, double> weeklyProgressPercentage) {
+  Widget _buildWeeklyProgressPercentage(Map<String, double> weeklyProgressPercentage, Color textColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: weeklyProgressPercentage.entries.map((entry) {
@@ -229,11 +251,11 @@ class ProgressPage extends StatelessWidget {
             children: [
               Text(
                 entry.key,
-                style: const TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 18, color: textColor),
               ),
               Text(
                 '${entry.value.toStringAsFixed(1)}%',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
               ),
             ],
           ),
@@ -242,7 +264,7 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage, S localizations) {
+  Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage, S localizations, Color textColor) {
     final shortDays = [
       localizations.mondayShort,
       localizations.tuesdayShort,
@@ -296,7 +318,7 @@ class ProgressPage extends StatelessWidget {
                 interval: 20,
                 reservedSize: 40,
                 getTitlesWidget: (value, meta) {
-                  return Text('${value.toInt()}%', style: TextStyle(color: Colors.black));
+                  return Text('${value.toInt()}%', style: TextStyle(color: textColor));
                 },
               ),
             ),
@@ -305,7 +327,7 @@ class ProgressPage extends StatelessWidget {
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
                   if (value >= 0 && value < shortDays.length) {
-                    return Text(shortDays[value.toInt()], style: TextStyle(color: Colors.black));
+                    return Text(shortDays[value.toInt()], style: TextStyle(color: textColor));
                   }
                   return const Text('');
                 },
@@ -331,7 +353,7 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildYearlyProgressChart(BuildContext context, S localizations) {
+  Widget _buildYearlyProgressChart(BuildContext context, S localizations, Color textColor) {
     final months = [
       localizations.january,
       localizations.february,
@@ -364,11 +386,11 @@ class ProgressPage extends StatelessWidget {
                 children: [
                   Text(
                     month,
-                    style: const TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, color: textColor),
                   ),
                   Text(
                     '${progress.isNaN ? 0.0 : progress.toStringAsFixed(1)}%',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
                   ),
                 ],
               ),

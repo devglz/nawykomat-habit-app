@@ -94,6 +94,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
   @override
   Widget build(BuildContext context) {
     final localizations = S.of(context); // Poprawiony dostęp do lokalizacji
+    final textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
 
     return Scaffold(
       appBar: AppBar(
@@ -116,12 +117,12 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                 children: [
                   Text(
                     localizations.appearance,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: Text(localizations.darkMode),
-                    subtitle: Text(localizations.darkModeSubtitle),
+                    title: Text(localizations.darkMode, style: TextStyle(color: textColor)),
+                    subtitle: Text(localizations.darkModeSubtitle, style: TextStyle(color: textColor)),
                     value: isDarkMode,
                     onChanged: (value) {
                       setState(() {
@@ -133,7 +134,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                   ),
                   const Divider(),
                   ListTile(
-                    title: Text(localizations.textSize),
+                    title: Text(localizations.textSize, style: TextStyle(color: textColor)),
                     subtitle: Slider(
                       value: fontSize,
                       min: 12.0,
@@ -162,14 +163,14 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                 children: [
                   Text(
                     localizations.themeColor,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 8.0,
                     children: colorOptions.map((color) {
                       return ChoiceChip(
-                        label: Text(color),
+                        label: Text(color, style: TextStyle(color: textColor)),
                         selected: selectedColor == color,
                         onSelected: (bool selected) {
                           setState(() {
@@ -194,11 +195,11 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                 children: [
                   Text(
                     localizations.layout,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 16),
                   ListTile(
-                    title: Text(localizations.compactView),
+                    title: Text(localizations.compactView, style: TextStyle(color: textColor)),
                     trailing: Switch(
                       value: false,
                       onChanged: (value) {
@@ -207,7 +208,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                     ),
                   ),
                   ListTile(
-                    title: Text(localizations.showLabels),
+                    title: Text(localizations.showLabels, style: TextStyle(color: textColor)),
                     trailing: Switch(
                       value: true,
                       onChanged: (value) {

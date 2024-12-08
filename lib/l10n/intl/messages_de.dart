@@ -377,6 +377,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thursdayShort": MessageLookupByLibrary.simpleMessage("Do"),
         "timeOfDay": MessageLookupByLibrary.simpleMessage("Tageszeit"),
         "timeRange": MessageLookupByLibrary.simpleMessage("Zeitraum"),
+        "totalHabits":
+            MessageLookupByLibrary.simpleMessage("Gesamtgewohnheiten"),
         "totalWorkHours":
             MessageLookupByLibrary.simpleMessage("Gesamtarbeitsstunden"),
         "trackProgress": MessageLookupByLibrary.simpleMessage(

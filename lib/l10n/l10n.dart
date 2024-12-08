@@ -59,6 +59,7 @@ class S {
       args: [],
     );
   }
+
   /// Select Language
   String get selectLanguage => 'Select Language';
 
@@ -2411,6 +2412,16 @@ class S {
       args: [],
     );
   }
+
+  String get totalHabits {
+    return Intl.message(
+      'Total Habits',
+      name: 'totalHabits',
+      desc: '',
+      args: [],
+    );
+  }
+
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

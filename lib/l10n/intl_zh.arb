@@ -195,7 +195,7 @@
     "readyToGoDescription": "您已准备好开始您的旅程！",
     "startNow": "立即开始",
     "skip": "跳过",
-    "enterEmail": "请输入您的邮箱地址。",
+    "enterEmail": "请输入您的邮箱���址。",
     "enterPassword": "请输入您的密码。",
     "emailNotVerified": "邮箱地址未验证。请检查您的收件箱。",
     "invalidEmailOrPassword": "无效的邮箱或密码。",
@@ -227,7 +227,7 @@
     "privacyPolicySection1Title": "1. 简介",
     "privacyPolicySection1Content": "本隐私政策描述了 Nawykomat 应用用户的个人数据处理和保护规则。我们尊重您的隐私，并致力于保护您的个人数据。",
     "privacyPolicySection2Title": "2. 数据控制者",
-    "privacyPolicySection2Content": "您的个人数据控制者是位于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。",
+    "privacyPolicySection2Content": "您的个人数据控制者���位于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。",
     "privacyPolicySection3Title": "3. 收集的数据",
     "privacyPolicySection3Content": "我们收集以下类别的数据：\n• 基本数据（姓名，邮箱地址）\n• 应用使用数据\n• 习惯进度数据\n• 设备技术数据",
     "privacyPolicySection4Title": "4. 数据处理目的",
@@ -243,6 +243,6 @@
     "privacyPolicySection9Title": "9. 数据共享",
     "privacyPolicySection9Content": "我们不会向第三方出售或共享您的个人数据，除非本政策中另有描述。",
     "privacyPolicySection10Title": "10. 联系方式",
-    "privacyPolicySection10Content": "有关数据保护的相关问题，您可以通过以下方式联系我们：privacy@nawykomat.pl"
-  }
-  
+    "privacyPolicySection10Content": "有关数据保护的相关问题，您可以通过以下方式联系我们：privacy@nawykomat.pl",
+    "totalHabits": "总习惯"
+}

@@ -101,7 +101,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailNotificationsSubtitle":
             MessageLookupByLibrary.simpleMessage("通过邮箱接收通知"),
         "emailsDoNotMatch": MessageLookupByLibrary.simpleMessage("邮箱地址不匹配。"),
-        "enterEmail": MessageLookupByLibrary.simpleMessage("请输入您的邮箱地址。"),
+        "enterEmail": MessageLookupByLibrary.simpleMessage("请输入您的邮箱���址。"),
         "enterEmailInBothFields":
             MessageLookupByLibrary.simpleMessage("请在两个字段中输入邮箱地址。"),
         "enterNewEmailTwice":
@@ -209,7 +209,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicySection1Title":
             MessageLookupByLibrary.simpleMessage("1. 简介"),
         "privacyPolicySection2Content": MessageLookupByLibrary.simpleMessage(
-            "您的个人数据控制者是位于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。"),
+            "您的个人数据控制者���位于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。"),
         "privacyPolicySection2Title":
             MessageLookupByLibrary.simpleMessage("2. 数据控制者"),
         "privacyPolicySection3Content": MessageLookupByLibrary.simpleMessage(
@@ -305,6 +305,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thursdayShort": MessageLookupByLibrary.simpleMessage("周四"),
         "timeOfDay": MessageLookupByLibrary.simpleMessage("一天中的时间"),
         "timeRange": MessageLookupByLibrary.simpleMessage("时间范围"),
+        "totalHabits": MessageLookupByLibrary.simpleMessage("总习惯"),
         "totalWorkHours": MessageLookupByLibrary.simpleMessage("总工作时长"),
         "trackProgress": MessageLookupByLibrary.simpleMessage("追踪进度"),
         "trackProgressDescription":

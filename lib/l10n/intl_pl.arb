@@ -215,5 +215,6 @@
   "privacyPolicySection10Title": "10. Kontakt",
   "privacyPolicySection10Content": "W sprawach związanych z ochroną danych osobowych możesz kontaktować się z nami pod adresem: privacy@nawykomat.pl",
   "unknownEmail": "Nieznany email",
-  "unknownName": "Nieznane imię"
+  "unknownName": "Nieznane imię",
+  "totalHabits": "Wszystkie nawyki"
 }

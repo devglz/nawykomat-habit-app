@@ -154,13 +154,15 @@ class DayAreaPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final today = DateTime.now().weekday - 1; // Pobierz dzisiejszy dzień tygodnia (0 - poniedziałek, 1 - wtorek, itd.)
+
     return SingleChildScrollView(
       child: Column(
         children: [
           SectionTitle(title: _getSectionTitle(true, context)),
-          HabitList(isCompleted: false, dayArea: dayArea),
+          HabitList(isCompleted: false, dayArea: dayArea, selectedDay: today), // Przekaż dzisiejszy dzień tygodnia
           SectionTitle(title: _getSectionTitle(false, context)),
-          HabitList(isCompleted: true, dayArea: dayArea),
+          HabitList(isCompleted: true, dayArea: dayArea, selectedDay: today), // Przekaż dzisiejszy dzień tygodnia
         ],
       ),
     );
@@ -187,10 +189,12 @@ class SectionTitle extends StatelessWidget {
 class HabitList extends StatelessWidget {
   final bool isCompleted;
   final String dayArea;
+  final int selectedDay; // Dodaj pole selectedDay
 
   const HabitList({
     required this.isCompleted,
     required this.dayArea,
+    required this.selectedDay, // Dodaj pole selectedDay
     super.key,
   });
 
@@ -216,16 +220,17 @@ class HabitList extends StatelessWidget {
           final data = doc.data() as Map<String, dynamic>;
           final habitIsCompleted = data['isCompleted'] ?? false;
           final habitDayArea = data['dayArea'] ?? '';
-          
-          print('Habit: ${data['name']}, dayArea: $habitDayArea, isCompleted: $habitIsCompleted');
-          
+          final habitSelectedDays = List<int>.from(data['selectedDays'] ?? []);
+
+          print('Habit: ${data['name']}, dayArea: $habitDayArea, isCompleted: $habitIsCompleted, selectedDays: $habitSelectedDays');
+
           if (dayArea == 'all') {
-            return habitIsCompleted == isCompleted;
+            return habitIsCompleted == isCompleted && habitSelectedDays.contains(selectedDay);
           }
-          return habitIsCompleted == isCompleted && habitDayArea == dayArea;
+          return habitIsCompleted == isCompleted && habitDayArea == dayArea && habitSelectedDays.contains(selectedDay);
         }).toList();
 
-        print('Filtered habits for $dayArea (isCompleted: $isCompleted): ${habits.length}');
+        print('Filtered habits for $dayArea (isCompleted: $isCompleted, selectedDay: $selectedDay): ${habits.length}');
 
         if (habits.isEmpty) {
           return Padding(
@@ -246,9 +251,9 @@ class HabitList extends StatelessWidget {
           itemBuilder: (context, index) {
             final habit = habits[index];
             final data = habit.data() as Map<String, dynamic>;
-            
+
             print('Building HabitCard with ID: ${habit.id}');
-            
+
             return HabitCard(
               habitId: habit.id,
               title: data['name'] ?? '',
