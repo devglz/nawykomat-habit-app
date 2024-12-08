@@ -120,9 +120,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 value: MyApp.of(context)?.locale ?? S.delegate.supportedLocales.first,
                 onChanged: (Locale? newLocale) {
                   if (newLocale != null) {
-                    setState(() {
-                      MyApp.of(context)?.setLocale(newLocale);
-                    });
+                    MyApp.of(context)?.setLocale(newLocale);
                   }
                 },
                 items: S.delegate.supportedLocales.map<DropdownMenuItem<Locale>>((Locale locale) {

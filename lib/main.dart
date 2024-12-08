@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:habit_app/services/habit_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:habit_app/l10n/l10n.dart'; // Import L10n
+import 'package:cloud_firestore/cloud_firestore.dart'; // Dodaj ten import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,9 +106,11 @@ class MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _initializeTheme();
+    _initializeLocale(); // Dodaj inicjalizację języka
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
         _initializeTheme();
+        _initializeLocale(); // Dodaj inicjalizację języka
       }
     });
   }
@@ -142,6 +145,23 @@ class MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _initializeLocale() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          final localeString = doc.data()?['locale'] as String?;
+          if (localeString != null) {
+            setLocale(Locale(localeString));
+          }
+        }
+      } catch (e) {
+        debugPrint('Błąd podczas inicjalizacji języka: $e');
+      }
+    }
+  }
+
   void setThemeMode(ThemeMode themeMode) {
     setState(() {
       _themeMode = themeMode;
@@ -158,6 +178,20 @@ class MyAppState extends State<MyApp> {
     setState(() {
       _locale = locale;
     });
+    _saveLocaleToFirebase(locale.languageCode); // Zapisz język do Firebase
+  }
+
+  Future<void> _saveLocaleToFirebase(String languageCode) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'locale': languageCode,
+        });
+      } catch (e) {
+        debugPrint('Błąd podczas zapisywania języka do Firebase: $e');
+      }
+    }
   }
 
   Color _colorFromString(String colorString) {
