@@ -126,7 +126,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.personalizationTitle, style: const TextStyle(color: Colors.white)),
+        title: Text(localizations.personalizationTitle, style: TextStyle(color: Colors.white, fontSize: fontSize)),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -145,12 +145,12 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                 children: [
                   Text(
                     localizations.appearance,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 4, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: Text(localizations.darkMode, style: TextStyle(color: textColor)),
-                    subtitle: Text(localizations.darkModeSubtitle, style: TextStyle(color: textColor)),
+                    title: Text(localizations.darkMode, style: TextStyle(color: textColor, fontSize: fontSize)),
+                    subtitle: Text(localizations.darkModeSubtitle, style: TextStyle(color: textColor, fontSize: fontSize - 2)),
                     value: isDarkMode,
                     onChanged: (value) {
                       setState(() {
@@ -162,7 +162,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                   ),
                   const Divider(),
                   ListTile(
-                    title: Text(localizations.textSize, style: TextStyle(color: textColor)),
+                    title: Text(localizations.textSize, style: TextStyle(color: textColor, fontSize: fontSize)),
                     subtitle: Slider(
                       value: fontSize,
                       min: 12.0,
@@ -191,14 +191,14 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                 children: [
                   Text(
                     localizations.themeColor,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 4, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 8.0,
                     children: colorOptions.map((color) {
                       return ChoiceChip(
-                        label: Text(color, style: TextStyle(color: textColor)),
+                        label: Text(color, style: TextStyle(color: textColor, fontSize: fontSize)),
                         selected: selectedColor == color,
                         onSelected: (bool selected) {
                           setState(() {
@@ -223,7 +223,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                 children: [
                   Text(
                     localizations.language,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 4, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -236,7 +236,7 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                           width: 24,
                           height: 24,
                         ),
-                        label: Text(locale.languageCode.toUpperCase(), style: TextStyle(color: textColor)),
+                        label: Text(locale.languageCode.toUpperCase(), style: TextStyle(color: textColor, fontSize: fontSize)),
                         selected: MyApp.of(context)?.locale == locale,
                         onSelected: (bool selected) {
                           if (selected) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import 'package:habit_app/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:habit_app/services/habit_service.dart';
 import 'package:habit_app/services/user_service.dart'; // Dodaj ten import
@@ -228,6 +229,7 @@ class ProgressPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = S.of(context);
     final textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
+    final fontSize = MyApp.of(context)?.fontSize ?? 16.0; // Pobierz rozmiar czcionki z MyApp
 
     return ChangeNotifierProvider(
       create: (_) => ProgressPageState(context.read<HabitService>()),
@@ -235,7 +237,7 @@ class ProgressPage extends StatelessWidget {
         builder: (context, state, _) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(localizations.progressTitle, style: TextStyle(color: Colors.white)),
+              title: Text(localizations.progressTitle, style: TextStyle(color: Colors.white, fontSize: fontSize)),
               backgroundColor: Theme.of(context).primaryColor,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -251,7 +253,7 @@ class ProgressPage extends StatelessWidget {
                 children: [
                   Text(
                     localizations.summaryToday,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 8, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 20),
                   LayoutBuilder(
@@ -263,9 +265,9 @@ class ProgressPage extends StatelessWidget {
                           spacing: 16,
                           runSpacing: 16,
                           children: [
-                            _buildStatisticCard(localizations.activeHabits, state.activeHabits.toString(), textColor, cardWidth),
-                            _buildStatisticCard(localizations.completedTasks, state.completedHabits.toString(), textColor, cardWidth),
-                            _buildStatisticCard(localizations.successRate, '${state.successRate.toStringAsFixed(1)}%', textColor, cardWidth),
+                            _buildStatisticCard(localizations.activeHabits, state.activeHabits.toString(), textColor, cardWidth, fontSize),
+                            _buildStatisticCard(localizations.completedTasks, state.completedHabits.toString(), textColor, cardWidth, fontSize),
+                            _buildStatisticCard(localizations.successRate, '${state.successRate.toStringAsFixed(1)}%', textColor, cardWidth, fontSize),
                           ],
                         ),
                       );
@@ -274,29 +276,29 @@ class ProgressPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   Text(
                     localizations.weeklyProgress,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 8, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 10),
-                  _buildWeeklyProgressPercentage(state.getWeeklyProgressPercentage(localizations), textColor),
+                  _buildWeeklyProgressPercentage(state.getWeeklyProgressPercentage(localizations), textColor, fontSize),
                   const SizedBox(height: 20),
-                  _buildWeeklyBarChart(state.getWeeklyProgressPercentage(localizations), localizations, textColor),
+                  _buildWeeklyBarChart(state.getWeeklyProgressPercentage(localizations), localizations, textColor, fontSize),
                   const SizedBox(height: 20),
                   Text(
                     '${localizations.mostActiveDay}: ${state.getMostActiveDayName(localizations)}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 2, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     '${localizations.totalHabits}: ${state.totalHabits}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 2, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 40), // Zwiększ odstęp
                   Text(
                     localizations.yearlyProgress,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 8, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 10),
-                  _buildYearlyProgressChart(context, localizations, textColor),
+                  _buildYearlyProgressChart(context, localizations, textColor, fontSize),
                 ],
               ),
             ),
@@ -306,7 +308,7 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatisticCard(String title, String value, Color textColor, double width) {
+  Widget _buildStatisticCard(String title, String value, Color textColor, double width, double fontSize) {
     return SizedBox(
       width: width,
       child: Card(
@@ -320,13 +322,13 @@ class ProgressPage extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textColor), // Zmniejsz rozmiar czcionki
+                style: TextStyle(fontSize: fontSize - 1, fontWeight: FontWeight.bold, color: textColor), // Zmniejsz rozmiar czcionki
               ),
               const SizedBox(height: 10),
               Text(
                 value,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor), // Zmniejsz rozmiar czcionki
+                style: TextStyle(fontSize: fontSize + 6, fontWeight: FontWeight.bold, color: textColor), // Zmniejsz rozmiar czcionki
               ),
             ],
           ),
@@ -335,7 +337,7 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyProgressPercentage(Map<String, double> weeklyProgressPercentage, Color textColor) {
+  Widget _buildWeeklyProgressPercentage(Map<String, double> weeklyProgressPercentage, Color textColor, double fontSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: weeklyProgressPercentage.entries.map((entry) {
@@ -346,11 +348,11 @@ class ProgressPage extends StatelessWidget {
             children: [
               Text(
                 entry.key,
-                style: TextStyle(fontSize: 18, color: textColor),
+                style: TextStyle(fontSize: fontSize + 2, color: textColor),
               ),
               Text(
                 '${entry.value.toStringAsFixed(1)}%',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+                style: TextStyle(fontSize: fontSize + 2, fontWeight: FontWeight.bold, color: textColor),
               ),
             ],
           ),
@@ -359,7 +361,7 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage, S localizations, Color textColor) {
+  Widget _buildWeeklyBarChart(Map<String, double> weeklyProgressPercentage, S localizations, Color textColor, double fontSize) {
     final shortDays = [
       localizations.mondayShort,
       localizations.tuesdayShort,
@@ -413,7 +415,7 @@ class ProgressPage extends StatelessWidget {
                 interval: 20,
                 reservedSize: 40,
                 getTitlesWidget: (value, meta) {
-                  return Text('${value.toInt()}%', style: TextStyle(color: textColor));
+                  return Text('${value.toInt()}%', style: TextStyle(color: textColor, fontSize: fontSize - 2));
                 },
               ),
             ),
@@ -422,7 +424,7 @@ class ProgressPage extends StatelessWidget {
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
                   if (value >= 0 && value < shortDays.length) {
-                    return Text(shortDays[value.toInt()], style: TextStyle(color: textColor));
+                    return Text(shortDays[value.toInt()], style: TextStyle(color: textColor, fontSize: fontSize - 2));
                   }
                   return const Text('');
                 },
@@ -438,7 +440,7 @@ class ProgressPage extends StatelessWidget {
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
                   '${fullDays[group.x]}: ${rod.toY.toStringAsFixed(1)}%',
-                  TextStyle(color: Colors.white),
+                  TextStyle(color: Colors.white, fontSize: fontSize - 2),
                 );
               },
             ),
@@ -448,7 +450,7 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  Widget _buildYearlyProgressChart(BuildContext context, S localizations, Color textColor) {
+  Widget _buildYearlyProgressChart(BuildContext context, S localizations, Color textColor, double fontSize) {
     final months = [
       localizations.january,
       localizations.february,
@@ -471,7 +473,7 @@ class ProgressPage extends StatelessWidget {
           return const CircularProgressIndicator();
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Text(localizations.noActiveHabits, style: TextStyle(color: textColor));
+          return Text(localizations.noActiveHabits, style: TextStyle(color: textColor, fontSize: fontSize));
         }
         final yearlyProgress = snapshot.data!;
         return Column(
@@ -484,11 +486,11 @@ class ProgressPage extends StatelessWidget {
                 children: [
                   Text(
                     month,
-                    style: TextStyle(fontSize: 18, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 2, color: textColor),
                   ),
                   Text(
                     '${progress.isNaN ? 0.0 : progress.toStringAsFixed(1)}%',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+                    style: TextStyle(fontSize: fontSize + 2, fontWeight: FontWeight.bold, color: textColor),
                   ),
                 ],
               ),

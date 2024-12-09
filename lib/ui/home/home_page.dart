@@ -11,6 +11,7 @@ import 'package:intl/intl.dart'; // Dodaj import
 import 'package:flutter/foundation.dart' show kIsWeb; // Dodaj import
 import 'package:habit_app/l10n/l10n.dart'; // Dodaj import
 import 'package:flutter_localizations/flutter_localizations.dart'; // Dodaj import
+import 'package:audioplayers/audioplayers.dart'; // Dodaj import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -301,6 +302,8 @@ class HabitCard extends StatefulWidget {
 }
 
 class _HabitCardState extends State<HabitCard> {
+  final AudioPlayer _audioPlayer = AudioPlayer(); // Dodaj instancję AudioPlayer
+
   @override
   Widget build(BuildContext context) {
     print('Rendering HabitCard: ${widget.habitId}');
@@ -327,6 +330,10 @@ class _HabitCardState extends State<HabitCard> {
                 try {
                   await HabitService().toggleHabitCompletion(widget.habitId, widget.isCompleted);
                   if (mounted) { // Sprawdź, czy widget jest zamontowany
+                    if (!widget.isCompleted) {
+                      await _audioPlayer.setVolume(1.0); // Ustaw głośność na 100%
+                      await _audioPlayer.play(AssetSource('bell-ring.mp3')); // Odtwórz dźwięk
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
