@@ -465,13 +465,13 @@ class ProgressPage extends StatelessWidget {
     ];
     final habitService = context.read<HabitService>();
     return FutureBuilder<Map<String, double>>(
-      future: habitService.getYearlyCompletionPercentage(),
+      future: habitService.getYearlyCompletionPercentage(localizations),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Text(localizations.noActiveHabits, style: TextStyle(color: textColor)); // Zmień na istniejący getter
+          return Text(localizations.noActiveHabits, style: TextStyle(color: textColor));
         }
         final yearlyProgress = snapshot.data!;
         return Column(

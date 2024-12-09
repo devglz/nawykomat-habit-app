@@ -37,6 +37,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nawykomat to aplikacja stworzona z myślą o pomocy w budowaniu pozytywnych nawyków..."),
         "aboutAppSubtitle":
             MessageLookupByLibrary.simpleMessage("Informacje i licencje"),
+        "accountCreatedCheckEmail": MessageLookupByLibrary.simpleMessage(
+            "Konto zostało utworzone. Sprawdź swoją skrzynkę e-mail, aby zweryfikować konto."),
         "accountSettings":
             MessageLookupByLibrary.simpleMessage("Ustawienia konta"),
         "activeHabits": MessageLookupByLibrary.simpleMessage("Aktywne nawyki"),
@@ -72,8 +74,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "compactView": MessageLookupByLibrary.simpleMessage("Kompaktowy widok"),
         "completedHabits":
             MessageLookupByLibrary.simpleMessage("Ukończone nawyki"),
+        "completedTasks":
+            MessageLookupByLibrary.simpleMessage("Ukończone zadania"),
         "confirmNewEmail":
             MessageLookupByLibrary.simpleMessage("Potwierdź nowy e-mail"),
+        "confirmNewPassword":
+            MessageLookupByLibrary.simpleMessage("Potwierdź nowe hasło"),
         "confirmation": MessageLookupByLibrary.simpleMessage("Potwierdzenie"),
         "contact": MessageLookupByLibrary.simpleMessage("Kontakt"),
         "contactSupport":
@@ -198,6 +204,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "morning": MessageLookupByLibrary.simpleMessage("PORANEK"),
         "mostActiveDay":
             MessageLookupByLibrary.simpleMessage("Najbardziej aktywny dzień"),
+        "name": MessageLookupByLibrary.simpleMessage("Imię"),
         "newEmail": MessageLookupByLibrary.simpleMessage("Nowy e-mail"),
         "no": MessageLookupByLibrary.simpleMessage("Nie"),
         "noActiveHabits":
@@ -285,6 +292,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "repeatSettings":
             MessageLookupByLibrary.simpleMessage("Ustawienia powtarzania"),
         "repeatSummary": m2,
+        "requiresRecentLogin": MessageLookupByLibrary.simpleMessage(
+            "Ta operacja jest wrażliwa i wymaga ponownego uwierzytelnienia. Zaloguj się ponownie przed ponowną próbą."),
         "resetPassword":
             MessageLookupByLibrary.simpleMessage("Resetowanie hasła"),
         "resetPasswordDescription": MessageLookupByLibrary.simpleMessage(
@@ -300,6 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectDate": MessageLookupByLibrary.simpleMessage("Wybierz datę"),
         "selectDaysOfWeek":
             MessageLookupByLibrary.simpleMessage("Wybierz dni tygodnia"),
+        "selectLanguage": MessageLookupByLibrary.simpleMessage("Wybierz język"),
         "september": MessageLookupByLibrary.simpleMessage("Wrzesień"),
         "setReminders":
             MessageLookupByLibrary.simpleMessage("USTAW PRZYPOMNIENIA"),

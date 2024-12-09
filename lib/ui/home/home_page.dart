@@ -363,9 +363,6 @@ class _HabitCardState extends State<HabitCard> {
             ),
           ],
         ),
-        onTap: () {
-          Navigator.pushNamed(context, '/habitDetail', arguments: widget.habitId);
-        },
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:habit_app/l10n/l10n.dart'; // Dodaj ten import
 
 class Habit {
   final String id;
@@ -312,7 +313,7 @@ class HabitService {
     return {};
   }
 
-  Future<Map<String, double>> getYearlyCompletionPercentage() async {
+  Future<Map<String, double>> getYearlyCompletionPercentage(S localizations) async {
   final user = _auth.currentUser;
   if (user != null) {
     final now = DateTime.now();
@@ -349,7 +350,20 @@ class HabitService {
     }
 
     Map<String, double> monthlyRates = {};
-    const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+    final months = [
+      localizations.january,
+      localizations.february,
+      localizations.march,
+      localizations.april,
+      localizations.may,
+      localizations.june,
+      localizations.july,
+      localizations.august,
+      localizations.september,
+      localizations.october,
+      localizations.november,
+      localizations.december
+    ];
     for (int i = 1; i <= 12; i++) {
       final total = totalByMonth[i] ?? 0;
       final completed = completedByMonth[i] ?? 0;

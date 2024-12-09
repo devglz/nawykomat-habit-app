@@ -245,5 +245,9 @@
     "privacyPolicySection10Title": "10. Contact",
     "privacyPolicySection10Content": "Pour toute question liée à la protection des données, vous pouvez nous contacter à : privacy@nawykomat.pl",
     "totalHabits": "Habitudes Totales",
-    "yearlyProgress": "Progrès Annuel"
+    "yearlyProgress": "Progrès Annuel",
+    "accountCreatedCheckEmail": "Compte créé. Vérifiez votre e-mail pour la vérification.",
+    "requiresRecentLogin": "Cette opération est sensible et nécessite une authentification récente. Connectez-vous à nouveau avant de réessayer cette demande.",
+    "selectLanguage": "Choisir la langue",
+    "name": "Nom"
 }

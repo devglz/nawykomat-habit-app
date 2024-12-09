@@ -39,6 +39,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nawykomat ist eine App, die entwickelt wurde, um positive Gewohnheiten aufzubauen..."),
         "aboutAppSubtitle":
             MessageLookupByLibrary.simpleMessage("Informationen und Lizenzen"),
+        "accountCreatedCheckEmail": MessageLookupByLibrary.simpleMessage(
+            "Konto erstellt. Überprüfen Sie Ihre E-Mails zur Verifizierung."),
         "accountSettings":
             MessageLookupByLibrary.simpleMessage("Kontoeinstellungen"),
         "activeHabits":
@@ -229,6 +231,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mehr Personalisierung"),
         "morning": MessageLookupByLibrary.simpleMessage("MORGEN"),
         "mostActiveDay": MessageLookupByLibrary.simpleMessage("Aktivster Tag"),
+        "name": MessageLookupByLibrary.simpleMessage("Name"),
         "newEmail": MessageLookupByLibrary.simpleMessage("Neue E-Mail"),
         "newPassword": MessageLookupByLibrary.simpleMessage("Neues Passwort"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
@@ -324,6 +327,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "repeatSettings":
             MessageLookupByLibrary.simpleMessage("Wiederholungseinstellungen"),
         "repeatSummary": m2,
+        "requiresRecentLogin": MessageLookupByLibrary.simpleMessage(
+            "Diese Operation ist sensibel und erfordert eine erneute Authentifizierung. Melden Sie sich erneut an, bevor Sie diese Anfrage erneut versuchen."),
         "resetPassword":
             MessageLookupByLibrary.simpleMessage("Passwort zurücksetzen"),
         "resetPasswordDescription": MessageLookupByLibrary.simpleMessage(
@@ -339,6 +344,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectDate": MessageLookupByLibrary.simpleMessage("Datum auswählen"),
         "selectDaysOfWeek": MessageLookupByLibrary.simpleMessage(
             "Wählen Sie die Wochentage aus"),
+        "selectLanguage":
+            MessageLookupByLibrary.simpleMessage("Sprache auswählen"),
         "september": MessageLookupByLibrary.simpleMessage("September"),
         "setReminders":
             MessageLookupByLibrary.simpleMessage("ERINNERUNGEN EINSTELLEN"),

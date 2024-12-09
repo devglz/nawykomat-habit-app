@@ -245,5 +245,9 @@
     "privacyPolicySection9Content": "No vendemos ni compartimos sus datos personales con terceros, excepto como se describe en esta política.",
     "privacyPolicySection10Title": "10. Contacto",
     "privacyPolicySection10Content": "Para cuestiones relacionadas con la protección de datos, puede contactarnos en: privacy@nawykomat.pl",
-    "totalHabits": "Hábitos Totales"
+    "totalHabits": "Hábitos Totales",
+    "accountCreatedCheckEmail": "Cuenta creada. Verifique su correo electrónico para la verificación.",
+    "requiresRecentLogin": "Esta operación es sensible y requiere autenticación reciente. Inicie sesión nuevamente antes de intentar esta solicitud.",
+    "selectLanguage": "Seleccionar idioma",
+    "name": "Nombre"
 }

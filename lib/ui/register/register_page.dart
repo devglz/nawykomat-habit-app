@@ -72,7 +72,27 @@ class _RegisterPageState extends State<RegisterPage> {
       if (user != null) {
         await saveUserName(user.uid, name); // Zapisz imię użytkownika
         await _sendVerificationEmail(user); // Wyślij e-mail weryfikacyjny
-        _showError(S.of(context).emailChangedCheckInbox);
+        setState(() {
+          _errorMessage = ''; // Wyczyść poprzednie błędy
+        });
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(S.of(context).accountCreatedCheckEmail),
+              content: Text(S.of(context).emailNotVerified),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushNamed(context, '/login');
+                  },
+                  child: Text(S.of(context).ok),
+                ),
+              ],
+            );
+          },
+        );
       } else {
         _showError(S.of(context).unknownError(''));
       }
@@ -193,7 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: localizations.profile,
+                          labelText: localizations.name, // Zmieniono na name
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -243,6 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: Text(
                             _errorMessage,
                             style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center, // Wyrównanie do środka
                           ),
                         ),
                       const SizedBox(height: 20),

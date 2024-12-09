@@ -79,10 +79,32 @@ class SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<void> _deleteAccount() async {
+  Future<void> _reauthenticateUser(String email, String password) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await user.delete();
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+    }
+  }
+
+  Future<void> _deleteAccount(String email, String password) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await _reauthenticateUser(email, password);
+        // Usuń dane użytkownika z bazy danych
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
+        await user.delete();
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'requires-recent-login') {
+          _showMessage(S.of(context).requiresRecentLogin);
+        } else {
+          _showMessage(S.of(context).unknownError(e.message ?? ''));
+        }
+      }
     }
   }
 
@@ -90,6 +112,8 @@ class SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) {
+        final TextEditingController emailController = TextEditingController();
+        final TextEditingController passwordController = TextEditingController();
         return AlertDialog(
           title: Column(
             children: [
@@ -102,7 +126,28 @@ class SettingsPageState extends State<SettingsPage> {
               Text(S.of(context).deleteAccountTitle),
             ],
           ),
-          content: Text(S.of(context).deleteAccountConfirmation),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(S.of(context).deleteAccountConfirmation),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: S.of(context).email,
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  labelText: S.of(context).password,
+                  border: const OutlineInputBorder(),
+                ),
+                obscureText: true,
+              ),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -112,9 +157,19 @@ class SettingsPageState extends State<SettingsPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await _deleteAccount();
-                if (mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                final email = emailController.text.trim();
+                final password = passwordController.text.trim();
+                if (email.isNotEmpty && password.isNotEmpty) {
+                  try {
+                    await _deleteAccount(email, password);
+                    if (mounted) {
+                      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                    }
+                  } catch (e) {
+                    _showMessage(S.of(context).unknownError(e.toString()));
+                  }
+                } else {
+                  _showMessage(S.of(context).enterPassword);
                 }
               },
               child: Text(S.of(context).deleteAccount),

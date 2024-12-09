@@ -1,4 +1,3 @@
-
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -2431,11 +2430,41 @@ class S {
     );
   }
 
+  /// `Account created. Check your email for verification.`
+  String get accountCreatedCheckEmail {
+    return Intl.message(
+      'Account created. Check your email for verification.',
+      name: 'accountCreatedCheckEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This operation is sensitive and requires recent authentication. Log in again before retrying this request.`
+  String get requiresRecentLogin {
+    return Intl.message(
+      'This operation is sensitive and requires recent authentication. Log in again before retrying this request.',
+      name: 'requiresRecentLogin',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Select Language`
   String get selectLanguage {
     return Intl.message(
       'Select Language',
       name: 'selectLanguage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name`
+  String get name {
+    return Intl.message(
+      'Name',
+      name: 'name',
       desc: '',
       args: [],
     );
@@ -2472,4 +2501,3 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
     return false;
   }
 }
-

@@ -244,5 +244,9 @@
   "privacyPolicySection10Title": "10. Contact",
   "privacyPolicySection10Content": "For matters related to data protection, you can contact us at: privacy@nawykomat.pl",
   "totalHabits": "Total Habits",
-  "yearlyProgress": "Yearly Progress"
+  "yearlyProgress": "Yearly Progress",
+  "accountCreatedCheckEmail": "Account created. Check your email for verification.",
+  "requiresRecentLogin": "This operation is sensitive and requires recent authentication. Log in again before retrying this request.",
+  "selectLanguage": "Select Language",
+  "name": "Name"
 }

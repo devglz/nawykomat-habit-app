@@ -50,15 +50,60 @@ class UserService {
     }
   }
 
-  // Usuwanie konta
-  Future<void> deleteAccount() async {
+  // Usuwanie danych użytkownika
+  Future<void> deleteUserData() async {
     try {
       if (userId.isEmpty) return;
       await _firestore.collection('users').doc(userId).delete();
-      await currentUser?.delete();
+      print('Dane użytkownika zostały usunięte.');
     } catch (e) {
-      print('Błąd podczas usuwania konta: $e');
+      print('Wystąpił błąd podczas usuwania danych: $e');
       rethrow;
+    }
+  }
+
+  // Usuwanie konta
+  Future<void> deleteAccount(String email, String password) async {
+    try {
+      if (userId.isEmpty) return;
+      await reauthenticateUser(email, password);
+      await deleteUserData();
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.delete();
+        print('Konto zostało usunięte.');
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        print('Użytkownik musi ponownie się zalogować przed usunięciem konta.');
+      } else {
+        print('Wystąpił błąd: ${e.message}');
+      }
+      rethrow;
+    } catch (e) {
+      print('Błąd podczas usuwania konta: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  Future<void> reauthenticateUser(String email, String password) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('Brak zalogowanego użytkownika.');
+        throw FirebaseAuthException(
+          code: 'user-not-logged-in',
+          message: 'Użytkownik nie jest zalogowany.',
+        );
+      }
+
+      print('Ponawiam uwierzytelnienie dla: $email');
+      final credential = EmailAuthProvider.credential(email: email, password: password);
+      await user.reauthenticateWithCredential(credential);
+      print('Ponowne logowanie zakończone sukcesem.');
+    } on FirebaseAuthException catch (e) {
+      print('Błąd ponownego logowania: ${e.code} - ${e.message}');
+      throw e;
     }
   }
 

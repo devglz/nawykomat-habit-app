@@ -34,6 +34,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "aboutAppDescription": MessageLookupByLibrary.simpleMessage(
             "Nawykomat 是一款旨在帮助建立积极习惯的应用程序..."),
         "aboutAppSubtitle": MessageLookupByLibrary.simpleMessage("信息和许可证"),
+        "accountCreatedCheckEmail":
+            MessageLookupByLibrary.simpleMessage("帐户已创建。检查您的电子邮件以进行验证。"),
         "accountSettings": MessageLookupByLibrary.simpleMessage("账户设置"),
         "activeHabits": MessageLookupByLibrary.simpleMessage("进行中的习惯"),
         "addHabit": MessageLookupByLibrary.simpleMessage("添加习惯"),
@@ -63,7 +65,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatWithSupport": MessageLookupByLibrary.simpleMessage("与支持团队聊天"),
         "compactView": MessageLookupByLibrary.simpleMessage("紧凑视图"),
         "completedHabits": MessageLookupByLibrary.simpleMessage("已完成的习惯"),
-        "completedTasks": MessageLookupByLibrary.simpleMessage("完成的任务"),
+        "completedTasks": MessageLookupByLibrary.simpleMessage("已完成的任务"),
         "confirmDeleteAccount":
             MessageLookupByLibrary.simpleMessage("您确定要删除您的账户吗？"),
         "confirmNewEmail": MessageLookupByLibrary.simpleMessage("确认新邮箱"),
@@ -101,7 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailNotificationsSubtitle":
             MessageLookupByLibrary.simpleMessage("通过邮箱接收通知"),
         "emailsDoNotMatch": MessageLookupByLibrary.simpleMessage("邮箱地址不匹配。"),
-        "enterEmail": MessageLookupByLibrary.simpleMessage("请输入您的邮箱���址。"),
+        "enterEmail": MessageLookupByLibrary.simpleMessage("请输入您的邮箱地址。"),
         "enterEmailInBothFields":
             MessageLookupByLibrary.simpleMessage("请在两个字段中输入邮箱地址。"),
         "enterNewEmailTwice":
@@ -140,7 +142,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "guideContent3": MessageLookupByLibrary.simpleMessage(
             "保持行动动力可能是一项挑战。以下是一些策略：\n\n1. 设定现实目标。\n2. 找到您的“为什么”。\n3. 与积极的人为伴。\n4. 庆祝小成功。\n5. 保持灵活并调整计划。\n\n附加信息：\n- 设定现实目标。\n- 找到您的“为什么”。\n- 与积极的人为伴。\n- 庆祝小成功。\n- 保持灵活并调整计划。"),
         "guideContent4": MessageLookupByLibrary.simpleMessage(
-            "健康的饮食习惯是幸福的关键。以下是一些提示：\n\n1. 定时吃饭。\n2. 选择全食。\n3. 避免加工食品。\n4. 多喝水。\n5. 倾听您的身体。\n\n附加信息：\n- 设定现实目标。\n- 找到您的“为什么”。\n- 与积极的人为伴。\n- 庆祝小成功。\n- 保持灵活并调整计划。"),
+            "健康的饮食习惯是幸福的关键。以下是一些提示：\n\n1. 定时吃饭。\n2. 选择全食。\n3. 避免加工食品。\n4. 多喝水。\n5. 倾听您的身体。\n\n附加信息：\n- 设定现实���标。\n- 找到您的“为什么”。\n- 与积极的人为伴。\n- 庆祝小成功。\n- 保持灵活并调整计划。"),
         "guideSubtitle1":
             MessageLookupByLibrary.simpleMessage("学习如何有效地创建和保持良好的习惯。"),
         "guideSubtitle2": MessageLookupByLibrary.simpleMessage("有效时间管理的提示。"),
@@ -179,6 +181,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "morePersonalization": MessageLookupByLibrary.simpleMessage("更多个性化设置"),
         "morning": MessageLookupByLibrary.simpleMessage("早上"),
         "mostActiveDay": MessageLookupByLibrary.simpleMessage("最活跃的一天"),
+        "name": MessageLookupByLibrary.simpleMessage("名字"),
         "newEmail": MessageLookupByLibrary.simpleMessage("新邮箱"),
         "newPassword": MessageLookupByLibrary.simpleMessage("新密码"),
         "no": MessageLookupByLibrary.simpleMessage("否"),
@@ -209,7 +212,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicySection1Title":
             MessageLookupByLibrary.simpleMessage("1. 简介"),
         "privacyPolicySection2Content": MessageLookupByLibrary.simpleMessage(
-            "您的个人数据控制者���于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。"),
+            "您的个人数据控制者位于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。"),
         "privacyPolicySection2Title":
             MessageLookupByLibrary.simpleMessage("2. 数据控制者"),
         "privacyPolicySection3Content": MessageLookupByLibrary.simpleMessage(
@@ -259,6 +262,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "repeat": MessageLookupByLibrary.simpleMessage("重复"),
         "repeatSettings": MessageLookupByLibrary.simpleMessage("重复设置"),
         "repeatSummary": m2,
+        "requiresRecentLogin": MessageLookupByLibrary.simpleMessage(
+            "此操作很敏感，需要最近的身份验证。请重新登录后再重试此请求。"),
         "resetPassword": MessageLookupByLibrary.simpleMessage("重置密码"),
         "resetPasswordDescription":
             MessageLookupByLibrary.simpleMessage("请输入您的邮箱地址以重置密码。"),
@@ -271,6 +276,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "schedule": MessageLookupByLibrary.simpleMessage("计划"),
         "selectDate": MessageLookupByLibrary.simpleMessage("选择日期"),
         "selectDaysOfWeek": MessageLookupByLibrary.simpleMessage("选择星期几"),
+        "selectLanguage": MessageLookupByLibrary.simpleMessage("选择语言"),
         "september": MessageLookupByLibrary.simpleMessage("九月"),
         "setReminders": MessageLookupByLibrary.simpleMessage("设置提醒"),
         "setRemindersDescription":

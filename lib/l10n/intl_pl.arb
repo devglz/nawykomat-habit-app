@@ -135,6 +135,7 @@
   "resetPassword": "Resetowanie hasła",
   "resetPasswordDescription": "Wpisz swój adres e-mail, aby zresetować hasło.",
   "newEmail": "Nowy e-mail",
+  "confirmNewPassword": "Potwierdź nowe hasło",
   "confirmNewEmail": "Potwierdź nowy e-mail",
   "emailErrorMessage": "Proszę wprowadzić adres e-mail w obu polach.",
   "emailMismatchError": "Adresy e-mail nie są zgodne.",
@@ -217,5 +218,10 @@
   "privacyPolicySection10Content": "W sprawach związanych z ochroną danych osobowych możesz kontaktować się z nami pod adresem: privacy@nawykomat.pl",
   "unknownEmail": "Nieznany email",
   "unknownName": "Nieznane imię",
-  "totalHabits": "Wszystkie nawyki"
+  "totalHabits": "Wszystkie nawyki",
+  "completedTasks": "Ukończone zadania",
+  "accountCreatedCheckEmail": "Konto zostało utworzone. Sprawdź swoją skrzynkę e-mail, aby zweryfikować konto.",
+  "requiresRecentLogin": "Ta operacja jest wrażliwa i wymaga ponownego uwierzytelnienia. Zaloguj się ponownie przed ponowną próbą.",
+  "selectLanguage": "Wybierz język",
+  "name": "Imię"
 }
