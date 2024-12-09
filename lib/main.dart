@@ -98,9 +98,13 @@ class MyAppState extends State<MyApp> {
   Color _themeColor = const Color(0xFF6750A4);
   Locale _locale = const Locale('pl');
   double _fontSize = 16.0;
+  bool _isCompactView = false;
+  bool _showLabels = true;
 
   Locale get locale => _locale;
   double get fontSize => _fontSize;
+  bool get isCompactView => _isCompactView;
+  bool get showLabels => _showLabels;
 
   @override
   void initState() {
@@ -208,6 +212,18 @@ Future<void> _initializeFontSize() async {
       _fontSize = fontSize;
     });
     _saveFontSizeToFirebase(fontSize);
+  }
+
+  void setCompactView(bool isCompactView) {
+    setState(() {
+      _isCompactView = isCompactView;
+    });
+  }
+
+  void setShowLabels(bool showLabels) {
+    setState(() {
+      _showLabels = showLabels;
+    });
   }
 
   Future<void> _saveLocaleToFirebase(String languageCode) async {

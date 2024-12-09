@@ -4,6 +4,7 @@ import 'package:habit_app/main.dart'; // Dodaj ten import
 import 'package:provider/provider.dart'; // Dodaj ten import
 import 'package:habit_app/services/habit_service.dart';
 import 'package:habit_app/l10n/l10n.dart'; // Dodaj import
+import 'package:flutter_svg/flutter_svg.dart'; // Dodaj ten import
 
 class PersonalizationPage extends StatefulWidget {
   const PersonalizationPage({super.key});
@@ -16,6 +17,8 @@ class PersonalizationPageState extends State<PersonalizationPage> {
   bool isDarkMode = false;
   double fontSize = 16.0;
   String selectedColor = 'Purple';
+  bool isCompactView = false;
+  bool showLabels = true;
   final List<String> colorOptions = [
     'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Black', 'Grey', 'Orange', 'Pink', 'Lime'
   ];
@@ -33,6 +36,8 @@ class PersonalizationPageState extends State<PersonalizationPage> {
         isDarkMode = prefs.getBool('darkMode') ?? false;
         fontSize = prefs.getDouble('fontSize') ?? 16.0;
         selectedColor = prefs.getString('themeColor') ?? 'Purple';
+        isCompactView = prefs.getBool('compactView') ?? false;
+        showLabels = prefs.getBool('showLabels') ?? true;
         _applyThemeColor(selectedColor);
       });
     });
@@ -43,11 +48,15 @@ class PersonalizationPageState extends State<PersonalizationPage> {
     await prefs.setBool('darkMode', isDarkMode);
     await prefs.setDouble('fontSize', fontSize);
     await prefs.setString('themeColor', selectedColor);
+    await prefs.setBool('compactView', isCompactView);
+    await prefs.setBool('showLabels', showLabels);
     _applyThemeColor(selectedColor);
     if (!mounted) return;
     final habitService = Provider.of<HabitService>(context, listen: false);
     await habitService.saveThemeColor(selectedColor);
     MyApp.of(context)?.setFontSize(fontSize); // Zapisz rozmiar tekstu do Firebase
+    MyApp.of(context)?.setCompactView(isCompactView);
+    MyApp.of(context)?.setShowLabels(showLabels);
   }
 
   void _applyThemeColor(String color) {
@@ -89,6 +98,25 @@ class PersonalizationPageState extends State<PersonalizationPage> {
   void _toggleDarkMode(bool isDarkMode) {
     final themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
     MyApp.of(context)?.setThemeMode(themeMode);
+  }
+
+  String getFlag(String languageCode) {
+    switch (languageCode) {
+      case 'en':
+        return 'assets/flags/gb.svg';
+      case 'pl':
+        return 'assets/flags/pl.svg';
+      case 'de':
+        return 'assets/flags/de.svg';
+      case 'es':
+        return 'assets/flags/es.svg';
+      case 'fr':
+        return 'assets/flags/fr.svg';
+      case 'zh':
+        return 'assets/flags/cn.svg';
+      default:
+        return 'assets/flags/unknown.svg';
+    }
   }
 
   @override
@@ -194,27 +222,30 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    localizations.layout,
+                    localizations.language,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 16),
-                  ListTile(
-                    title: Text(localizations.compactView, style: TextStyle(color: textColor)),
-                    trailing: Switch(
-                      value: false,
-                      onChanged: (value) {
-                        // Implementacja zmiany układu
-                      },
-                    ),
-                  ),
-                  ListTile(
-                    title: Text(localizations.showLabels, style: TextStyle(color: textColor)),
-                    trailing: Switch(
-                      value: true,
-                      onChanged: (value) {
-                        // Implementacja pokazywania etykiet
-                      },
-                    ),
+                  Wrap(
+                    spacing: 8.0,
+                    children: S.delegate.supportedLocales.map((locale) {
+                      final flag = getFlag(locale.languageCode);
+                      return ChoiceChip(
+                        avatar: SvgPicture.asset(
+                          flag,
+                          width: 24,
+                          height: 24,
+                        ),
+                        label: Text(locale.languageCode.toUpperCase(), style: TextStyle(color: textColor)),
+                        selected: MyApp.of(context)?.locale == locale,
+                        onSelected: (bool selected) {
+                          if (selected) {
+                            MyApp.of(context)?.setLocale(locale);
+                            _saveSettings();
+                          }
+                        },
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
