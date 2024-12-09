@@ -50,7 +50,6 @@ flutter:
     - assets/google_logo.png
     - assets/app_logo.png
     - assets/app_logo.svg
-
     - assets/images/jak-tworzyc-dobre-nawyki.jpg
     - assets/images/zarzadzanie-czasem.jpg
     - assets/images/motywacja-do-dzialania.jpg
@@ -61,6 +60,8 @@ flutter:
     - assets/flags/es.svg
     - assets/flags/fr.svg
     - assets/flags/cn.svg
+    - assets/google_logo.svg
+
 
   fonts:
     - family: Klasik

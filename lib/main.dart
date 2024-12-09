@@ -39,6 +39,7 @@ void main() async {
         Provider<HabitService>(
           create: (_) => HabitService(),
         ),
+        ChangeNotifierProvider(create: (context) => ProgressPageState(context.read<HabitService>())),
       ],
       child: const MyAppWebWrapper(),
     ),
@@ -163,22 +164,25 @@ class MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _initializeFontSize() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final fontSize = doc.data()?['fontSize'] as double?;
-          if (fontSize != null) {
-            setFontSize(fontSize);
-          }
+Future<void> _initializeFontSize() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (doc.exists) {
+        final fontSize = (doc.data()?['fontSize'] as num?)?.toDouble(); // Konwersja num na double
+        if (fontSize != null) {
+          setFontSize(fontSize); // Ustawienie rozmiaru czcionki
         }
-      } catch (e) {
-        debugPrint('Błąd podczas inicjalizacji rozmiaru tekstu: $e');
       }
+    } catch (e) {
+      debugPrint('Błąd podczas inicjalizacji rozmiaru tekstu: $e');
     }
   }
+}
 
   void setThemeMode(ThemeMode themeMode) {
     setState(() {

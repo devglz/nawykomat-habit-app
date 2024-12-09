@@ -60,9 +60,6 @@ class S {
     );
   }
 
-  /// Select Language
-  String get selectLanguage => 'Select Language';
-
   /// `Settings`
   String get settings {
     return Intl.message(
@@ -2413,6 +2410,7 @@ class S {
     );
   }
 
+  /// `Total Habits`
   String get totalHabits {
     return Intl.message(
       'Total Habits',
@@ -2422,6 +2420,25 @@ class S {
     );
   }
 
+  /// `Yearly Progress`
+  String get yearlyProgress {
+    return Intl.message(
+      'Yearly Progress',
+      name: 'yearlyProgress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Language`
+  String get selectLanguage {
+    return Intl.message(
+      'Select Language',
+      name: 'selectLanguage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

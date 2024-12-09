@@ -454,7 +454,7 @@ class AddHabitPageState extends State<AddHabitPage> with SingleTickerProviderSta
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: _addHabit,
+                      onPressed: _addHabit, // Wywołanie metody _addHabit
                       child: Text(localizations.save),
                     ),
                   ),

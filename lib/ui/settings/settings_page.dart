@@ -73,35 +73,6 @@ class SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _changePassword(String newPassword) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await user.updatePassword(newPassword);
-    }
-  }
-
-  Future<void> _resetPassword(String email) async {
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      if (mounted) _showMessage(S.of(context).resetPasswordEmailSent);
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        switch (e.code) {
-          case 'invalid-email':
-            _showMessage(S.of(context).invalidEmail);
-            break;
-          case 'user-not-found':
-            _showMessage(S.of(context).userNotFound);
-            break;
-          default:
-            _showMessage(S.of(context).unknownError(e.message ?? ''));
-        }
-      }
-    } catch (e) {
-      if (mounted) _showMessage(S.of(context).unknownError(e.toString()));
-    }
-  }
-
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
@@ -125,6 +96,7 @@ class SettingsPageState extends State<SettingsPage> {
               SvgPicture.asset(
                 'assets/app_logo.svg',
                 height: 80,
+                placeholderBuilder: (context) => CircularProgressIndicator(), // Dodaj placeholder
               ),
               const SizedBox(height: 16),
               Text(S.of(context).deleteAccountTitle),
@@ -175,6 +147,7 @@ class SettingsPageState extends State<SettingsPage> {
                   SvgPicture.asset(
                     'assets/app_logo.svg',
                     height: 80,
+                    placeholderBuilder: (context) => CircularProgressIndicator(), // Dodaj placeholder
                   ),
                   const SizedBox(height: 16),
                   Text(S.of(context).resetPasswordTitle),
@@ -272,6 +245,7 @@ class SettingsPageState extends State<SettingsPage> {
                   SvgPicture.asset(
                     'assets/app_logo.svg',
                     height: 80,
+                    placeholderBuilder: (context) => CircularProgressIndicator(), // Dodaj placeholder
                   ),
                   const SizedBox(height: 16),
                   Text(S.of(context).changeEmailTitle),
@@ -353,6 +327,7 @@ class SettingsPageState extends State<SettingsPage> {
               SvgPicture.asset(
                 'assets/app_logo.svg',
                 height: 80,
+                placeholderBuilder: (context) => CircularProgressIndicator(), // Dodaj placeholder
               ),
               const SizedBox(height: 16),
               Text(S.of(context).signOutTitle),
@@ -381,27 +356,6 @@ class SettingsPageState extends State<SettingsPage> {
   void _toggleDarkMode(bool isDarkMode) {
     final themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
     MyApp.of(context)?.setThemeMode(themeMode);
-  }
-
-  void _applyThemeColor(String color) {
-    Color themeColor;
-    switch (color) {
-      case 'Yellow':
-        themeColor = Colors.yellow;
-        break;
-      case 'Blue':
-        themeColor = Colors.blue;
-        break;
-      case 'Green':
-        themeColor = Colors.green;
-        break;
-      case 'Red':
-        themeColor = Colors.red;
-        break;
-      default:
-        themeColor = const Color(0xFF6750A4); // Purple
-    }
-    MyApp.of(context)?.setThemeColor(themeColor);
   }
 
   String getFlag(String languageCode) {
@@ -526,7 +480,7 @@ class SettingsPageState extends State<SettingsPage> {
                       builder: (context) {
                         return AlertDialog(
                           title: Text(localizations.selectLanguage),
-                          content: Container(
+                          content: SizedBox(
                             width: double.maxFinite,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -642,66 +596,6 @@ class SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
-  }
-
-  Future<String?> _showInputDialog(BuildContext context, String title) async {
-    String? input;
-    return showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: TextField(
-            onChanged: (value) {
-              input = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(input);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<bool> _showConfirmationDialogWithLogo(BuildContext context, String message) async {
-    return await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Column(
-            children: [
-              SvgPicture.asset(
-                'assets/app_logo.svg',
-                height: 80,
-              ),
-              const SizedBox(height: 16),
-              Text(S.of(context).confirmation),
-            ],
-          ),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('Tak'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('Nie'),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
   }
 
   Widget _buildSectionHeader(String title) {

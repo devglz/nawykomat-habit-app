@@ -209,7 +209,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicySection1Title":
             MessageLookupByLibrary.simpleMessage("1. 简介"),
         "privacyPolicySection2Content": MessageLookupByLibrary.simpleMessage(
-            "您的个人数据控制者���位于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。"),
+            "您的个人数据控制者���于华沙的 Nawykomat Sp. z o.o.，地址：ul. Przykładowa 1, 00-001 华沙。"),
         "privacyPolicySection2Title":
             MessageLookupByLibrary.simpleMessage("2. 数据控制者"),
         "privacyPolicySection3Content": MessageLookupByLibrary.simpleMessage(
@@ -322,6 +322,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "wednesday": MessageLookupByLibrary.simpleMessage("周三"),
         "wednesdayShort": MessageLookupByLibrary.simpleMessage("周三"),
         "weeklyProgress": MessageLookupByLibrary.simpleMessage("每周进度"),
+        "yearlyProgress": MessageLookupByLibrary.simpleMessage("年度进展"),
         "yes": MessageLookupByLibrary.simpleMessage("是")
       };
 }

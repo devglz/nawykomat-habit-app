@@ -224,7 +224,7 @@ class LoginPageState extends State<LoginPage> {
         child: Stack(
           children: [
             Positioned(
-              top: 20, // Przesuń flagi bardziej do góry
+              top: 60, // Jeszcze bardziej obniż flagi
               left: 20,
               child: DropdownButton<Locale>(
                 value: MyApp.of(context)?.locale ?? S.delegate.supportedLocales.first,

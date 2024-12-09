@@ -355,6 +355,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "wednesdayShort": MessageLookupByLibrary.simpleMessage("Śr"),
         "weeklyProgress":
             MessageLookupByLibrary.simpleMessage("Postęp tygodniowy"),
+        "yearlyProgress": MessageLookupByLibrary.simpleMessage("Roczny Postęp"),
         "yes": MessageLookupByLibrary.simpleMessage("Tak")
       };
 }

@@ -3,8 +3,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:habit_app/services/habit_service.dart';
+import 'package:habit_app/services/user_service.dart'; // Dodaj ten import
 import 'package:habit_app/l10n/l10n.dart';
 import 'package:flutter/foundation.dart'; // Dodaj ten import
+import 'package:intl/intl.dart'; // Dodaj ten import
 
 class ProgressPageState extends ChangeNotifier {
   final HabitService _habitService;
@@ -15,7 +17,21 @@ class ProgressPageState extends ChangeNotifier {
   Map<int, int> completionsByDay = {};
   int mostActiveDay = 1;
   List<FlSpot> weeklyProgress = [];
-  int totalHabits = 0; // Dodaj zmienną do przechowywania liczby wszystkich nawyków
+  int totalHabits = 0;
+  Map<int, int> completionsByMonth = {};
+  Map<DateTime, int> dailyCompletions = {}; // Add this line
+  Map<int, int> activeHabitsByDay = {}; // Dodaj tę zmienną jako pole klasy
+  double monthlyCompletionPercentage = 0.0; // Dodaj tę zmienną jako pole klasy
+
+  bool _mounted = true;
+
+  bool get mounted => _mounted;
+
+  @override
+  void dispose() {
+    _mounted = false;
+    super.dispose();
+  }
 
   ProgressPageState(this._habitService) {
     _loadStatistics();
@@ -23,73 +39,72 @@ class ProgressPageState extends ChangeNotifier {
 
   Future<void> _loadStatistics() async {
     try {
-      final today = DateTime.now().weekday - 1; // Pobierz dzisiejszy dzień tygodnia (0 - poniedziałek, 1 - wtorek, itd.)
+      final now = DateTime.now();
+      final weekStart = now.subtract(Duration(days: now.weekday - 1));
 
-      // Pobierz dane asynchronicznie
-      final activeHabitsCount = await _habitService.getActiveHabitsCountForDay(today);
-      final completions = await _habitService.getAllCompletions();
-
-      // Aktualizuj stan
-      activeHabits = activeHabitsCount;
-      completedHabits = completions.length;
-
-      // Oblicz procent sukcesu na podstawie dzisiejszych danych
-      final todayCompletions = completions.where((completion) {
-        final data = completion.data() as Map<String, dynamic>;
-        final date = (data['updatedAt'] as Timestamp).toDate();
-        return date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
-      }).length;
-
-      if (activeHabits > 0) {
-        successRate = (todayCompletions / activeHabits) * 100;
-      } else {
-        successRate = 0.0;
+      // Pobierz aktywne nawyki dla każdego dnia tygodnia
+      activeHabitsByDay.clear();
+      for (int i = 0; i < 7; i++) {
+        activeHabitsByDay[i] = await _habitService.getActiveHabitsCountForDay(i);
+        if (!mounted) return;
       }
 
-      // Oblicz statystyki dzienne
-      Map<DateTime, int> dailyCompletions = {};
+      // Pobierz wszystkie ukończenia nawyków
+      final completions = await _habitService.getAllCompletions();
+      if (!mounted) return;
+
+      // Oblicz ukończenia nawyków dla każdego dnia tygodnia
+      completionsByDay.clear();
       for (var completion in completions) {
         final data = completion.data() as Map<String, dynamic>;
-        final date = (data['updatedAt'] as Timestamp).toDate();
-        dailyCompletions[date] = (dailyCompletions[date] ?? 0) + 1;
-        completionsByDay[date.weekday] = (completionsByDay[date.weekday] ?? 0) + 1;
-      }
-
-      // Znajdź najbardziej aktywny dzień
-      int maxCompletions = 0;
-      completionsByDay.forEach((day, dayCount) {
-        if (dayCount > maxCompletions) {
-          maxCompletions = dayCount;
-          mostActiveDay = day;
+        if (data['updatedAt'] == null || !(data['updatedAt'] is Timestamp)) {
+          debugPrint('Brak pola updatedAt w dokumencie');
+          continue;
         }
-      });
-
-      // Oblicz postęp tygodniowy
-      weeklyProgress.clear();
-      final now = DateTime.now();
-      for (int i = 6; i >= 0; i--) {
-        final date = now.subtract(Duration(days: i));
-        final completionsCount = dailyCompletions[date] ?? 0;
-        weeklyProgress.add(FlSpot(6-i.toDouble(), completionsCount.toDouble()));
+        final updatedAt = (data['updatedAt'] as Timestamp).toDate();
+        final weekday = (updatedAt.weekday - 1) % 7; // Mapowanie: Poniedziałek = 0, ..., Niedziela = 6
+        completionsByDay[weekday] = (completionsByDay[weekday] ?? 0) + 1;
       }
+
+      // Oblicz wskaźnik sukcesu dla dzisiaj
+      final weekdayIndex = (now.weekday - 1) % 7; // 0 = Poniedziałek, ..., 6 = Niedziela
+      activeHabits = activeHabitsByDay[weekdayIndex] ?? 0;
+      completedHabits = completionsByDay[weekdayIndex] ?? 0;
+
+      debugPrint('Dane dzisiejsze: activeHabits=$activeHabits, completedHabits=$completedHabits');
+      successRate = activeHabits > 0 ? (completedHabits / activeHabits) * 100 : 0.0;
+
+      // Wypełnij dane dla wykresu tygodniowego
+      weeklyProgress = List.generate(7, (index) {
+        final dayActive = activeHabitsByDay[index] ?? 0;
+        final dayCompleted = completionsByDay[index] ?? 0;
+        final progress = dayActive > 0 ? (dayCompleted / dayActive) * 100 : 0.0;
+        return FlSpot(index.toDouble(), progress.isNaN ? 0.0 : progress);
+      });
 
       // Pobierz liczbę wszystkich nawyków
       totalHabits = await _habitService.getActiveHabitsCount();
+      if (!mounted) return;
 
-      notifyListeners();
+      // Oblicz ukończenia nawyków dla każdego miesiąca
+      completionsByMonth = await _habitService.calculateCompletionsByMonth();
+      if (!mounted) return;
+
+      // Oblicz procent ukończenia nawyków w bieżącym miesiącu
+      monthlyCompletionPercentage = await _habitService.calculateMonthlyCompletionPercentage();
+      if (!mounted) return;
+
+      debugPrint('Procent ukończenia w miesiącu: $monthlyCompletionPercentage%');
+
+      if (mounted) {
+        notifyListeners();
+      }
     } catch (e) {
-      debugPrint('Error loading statistics: $e');
-      activeHabits = 0;
-      completedHabits = 0;
-      successRate = 0.0;
-      completionsByDay.clear();
-      weeklyProgress.clear();
-      totalHabits = 0;
-      notifyListeners();
+      debugPrint('Błąd w _loadStatistics: $e');
     }
   }
 
-  // Dodaj metodę do obliczania procentowego postępu dla każdego dnia tygodnia
+  // Oblicz procent ukończenia dla każdego dnia tygodnia
   Map<String, double> getWeeklyProgressPercentage(S localizations) {
     final Map<String, double> weeklyProgressPercentage = {};
     final fullDays = [
@@ -101,16 +116,26 @@ class ProgressPageState extends ChangeNotifier {
       localizations.saturday,
       localizations.sunday
     ];
-    for (int i = 1; i <= 7; i++) {
+
+    // Oblicz procent ukończenia dla każdego dnia tygodnia
+    for (int i = 0; i < 7; i++) {
       final completionsCount = completionsByDay[i] ?? 0;
-      if (activeHabits > 0) {
-        weeklyProgressPercentage[fullDays[i - 1]] = (completionsCount / activeHabits) * 100;
+      final dayActiveHabits = activeHabitsByDay[i] ?? 0;
+
+      if (dayActiveHabits > 0) {
+        weeklyProgressPercentage[fullDays[i]] = (completionsCount / dayActiveHabits) * 100;
       } else {
-        weeklyProgressPercentage[fullDays[i - 1]] = 0.0;
+        weeklyProgressPercentage[fullDays[i]] = 0.0;
       }
+
+      debugPrint('Dzień ${fullDays[i]}: '
+          'completed=$completionsCount, active=$dayActiveHabits, '
+          'progress=${weeklyProgressPercentage[fullDays[i]]}%');
     }
+
     return weeklyProgressPercentage;
   }
+
 
   String getMostActiveDayName(S localizations) {
     switch (mostActiveDay) {
@@ -123,6 +148,76 @@ class ProgressPageState extends ChangeNotifier {
       case 7: return localizations.sunday;
       default: return '';
     }
+  }
+
+  double getMonthlyCompletionPercentage(int month) {
+    final completed = completionsByMonth[month] ?? 0;
+    final active = activeHabitsByDay.values.fold(0, (sum, count) => sum + count);
+    return active > 0 ? (completed / active) * 100 : 0.0;
+  }
+
+  Future<double> calculateCompletionPercentageFromDecember2024() async {
+    final startDate = DateTime(2024, 12, 1);
+    final habits = await _habitService.getHabitsFromDate(startDate);
+    final completions = await _habitService.getAllCompletions();
+
+    int totalHabits = 0;
+    int completedHabits = 0;
+
+    for (var habit in habits) {
+      final data = habit.data() as Map<String, dynamic>;
+      final selectedDays = data['selectedDays'] as List<int>;
+      final habitStartDate = (data['startDate'] as Timestamp).toDate();
+
+      if (habitStartDate.isAfter(startDate)) {
+        totalHabits += selectedDays.length;
+
+        for (var completion in completions) {
+          final completionData = completion.data() as Map<String, dynamic>;
+          final completionDate = (completionData['updatedAt'] as Timestamp).toDate();
+
+          if (completionDate.isAfter(startDate) && completionData['isCompleted'] == true) {
+            completedHabits++;
+          }
+        }
+      }
+    }
+
+    return totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0.0;
+  }
+
+  Future<double> calculateCompletionPercentage(DateTime startDate, DateTime endDate) async {
+    return await _habitService.calculateCompletionPercentage(startDate, endDate);
+  }
+
+  Future<double> calculateCompletionPercentageFromStartOfMonth() async {
+    return await _habitService.calculateCompletionPercentageFromStartOfMonth();
+  }
+
+  double calculateMonthlyProgress(int month) {
+    final now = DateTime.now();
+    
+    // Początek miesiąca
+    final startOfMonth = DateTime(now.year, month, 1);
+    final today = now.month == month ? now.day : DateTime(now.year, month + 1, 0).day;
+
+    int totalActive = 0; // Wszystkie aktywne nawyki od początku miesiąca
+    int totalCompleted = 0; // Wszystkie ukończone nawyki od początku miesiąca
+
+    for (int day = 1; day <= today; day++) {
+      final date = DateTime(now.year, month, day);
+      final weekday = (date.weekday + 6) % 7; // Mapowanie dni tygodnia (0-poniedziałek)
+
+      // Pobierz liczbę aktywnych nawyków dla tego dnia
+      final activeHabitsForDay = activeHabitsByDay[weekday] ?? 0;
+      final completedHabitsForDay = completionsByDay[weekday] ?? 0;
+
+      totalActive += activeHabitsForDay;
+      totalCompleted += completedHabitsForDay;
+    }
+
+    // Oblicz procent wykonania
+    return totalActive > 0 ? (totalCompleted / totalActive) * 100 : 0.0;
   }
 }
 
@@ -197,7 +292,7 @@ class ProgressPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 40), // Zwiększ odstęp
                   Text(
-                    localizations.habitCompletionPercentage,
+                    localizations.yearlyProgress,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 10),
@@ -375,7 +470,10 @@ class ProgressPage extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         }
-        final yearlyProgress = snapshot.data ?? {};
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Text(localizations.noActiveHabits, style: TextStyle(color: textColor)); // Zmień na istniejący getter
+        }
+        final yearlyProgress = snapshot.data!;
         return Column(
           children: months.map((month) {
             final progress = yearlyProgress[month] ?? 0.0;

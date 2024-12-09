@@ -98,6 +98,20 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    try {
+      User? user = await AuthService().signInWithGoogle();
+      if (user != null) {
+        if (!mounted) return;
+        Navigator.pushNamed(context, '/home');
+      } else {
+        _showError(S.of(context).googleSignInFailed);
+      }
+    } catch (e) {
+      _showError(S.of(context).googleSignInError(e.toString()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = S.of(context); // Dodaj dostęp do lokalizacji
@@ -114,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Stack(
           children: [
             Positioned(
-              top: 20, // Przesuń flagi bardziej do góry
+              top: 60, // Jeszcze bardziej obniż flagi
               left: 20,
               child: DropdownButton<Locale>(
                 value: MyApp.of(context)?.locale ?? S.delegate.supportedLocales.first,
@@ -213,6 +227,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       ElevatedButton(
                         onPressed: _register,
                         child: Text(localizations.createAccount),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: _signInWithGoogle,
+                        icon: SvgPicture.asset(
+                          'assets/google_logo.svg',
+                          height: 24,
+                        ),
+                        label: Text(localizations.signInWithGoogle),
                       ),
                       if (_errorMessage.isNotEmpty)
                         Padding(
