@@ -205,12 +205,12 @@ class HabitService {
             .get();
 
         for (var completion in completions.docs) {
-          final data = completion.data() as Map<String, dynamic>;
-          if (data['updatedAt'] == null || !(data['updatedAt'] is Timestamp)) {
+          final data = completion.data();
+          if (data['updatedAt'] == null || data['updatedAt'] is! Timestamp) {
             debugPrint('Brak pola updatedAt w dokumencie: ${completion.id}');
             continue;
           }
-          if (data['isCompleted'] == null || !(data['isCompleted'] is bool)) {
+          if (data['isCompleted'] == null || data['isCompleted'] is! bool) {
             debugPrint('Brak pola isCompleted w dokumencie: ${completion.id}');
             continue;
           }

@@ -240,6 +240,16 @@ class S {
     );
   }
 
+  /// `Default Size`
+  String get defaultSize {
+    return Intl.message(
+      'Default Size',
+      name: 'defaultSize',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Change Password`
   String get changePassword {
     return Intl.message(

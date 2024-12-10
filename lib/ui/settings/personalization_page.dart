@@ -126,7 +126,10 @@ class PersonalizationPageState extends State<PersonalizationPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.personalizationTitle, style: TextStyle(color: Colors.white, fontSize: fontSize)),
+        title: Text(
+          localizations.personalizationTitle,
+          style: TextStyle(color: Colors.white, fontSize: fontSize + 4), // Zwiększ rozmiar czcionki
+        ),
         backgroundColor: Theme.of(context).primaryColor, // Użyj koloru motywu
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -163,18 +166,32 @@ class PersonalizationPageState extends State<PersonalizationPage> {
                   const Divider(),
                   ListTile(
                     title: Text(localizations.textSize, style: TextStyle(color: textColor, fontSize: fontSize)),
-                    subtitle: Slider(
-                      value: fontSize,
-                      min: 12.0,
-                      max: 24.0,
-                      divisions: 12,
-                      label: fontSize.round().toString(),
-                      onChanged: (value) {
-                        setState(() {
-                          fontSize = value;
-                          _saveSettings();
-                        });
-                      },
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Slider(
+                          value: fontSize,
+                          min: 12.0,
+                          max: 24.0,
+                          divisions: 12,
+                          label: fontSize.round().toString(),
+                          onChanged: (value) {
+                            setState(() {
+                              fontSize = value;
+                              _saveSettings();
+                            });
+                          },
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              fontSize = 16.0;
+                              _saveSettings();
+                            });
+                          },
+                          child: Text(localizations.defaultSize, style: TextStyle(color: Theme.of(context).primaryColor, fontSize: fontSize)),
+                        ),
+                      ],
                     ),
                   ),
                 ],

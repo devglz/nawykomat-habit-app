@@ -58,7 +58,7 @@ class ProgressPageState extends ChangeNotifier {
       completionsByDay.clear();
       for (var completion in completions) {
         final data = completion.data() as Map<String, dynamic>;
-        if (data['updatedAt'] == null || !(data['updatedAt'] is Timestamp)) {
+        if (data['updatedAt'] == null || data['updatedAt'] is! Timestamp) {
           debugPrint('Brak pola updatedAt w dokumencie');
           continue;
         }
@@ -237,7 +237,10 @@ class ProgressPage extends StatelessWidget {
         builder: (context, state, _) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(localizations.progressTitle, style: TextStyle(color: Colors.white, fontSize: fontSize)),
+              title: Text(
+                localizations.progressTitle,
+                style: TextStyle(color: Colors.white, fontSize: fontSize + 4), // Zwiększ rozmiar czcionki
+              ),
               backgroundColor: Theme.of(context).primaryColor,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -328,7 +331,7 @@ class ProgressPage extends StatelessWidget {
               Text(
                 value,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: fontSize + 6, fontWeight: FontWeight.bold, color: textColor), // Zmniejsz rozmiar czcionki
+                style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: textColor), // Normalny rozmiar czcionki
               ),
             ],
           ),

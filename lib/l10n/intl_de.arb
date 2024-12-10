@@ -11,6 +11,7 @@
   "newEmail": "Neue E-Mail",
   "confirmNewEmail": "Neue E-Mail bestätigen",
   "cancel": "Abbrechen",
+  "defaultSize": "Standardgröße",
   "enterEmailInBothFields": "Bitte geben Sie die E-Mail-Adresse in beiden Feldern ein.",
   "emailsDoNotMatch": "E-Mail-Adressen stimmen nicht überein.",
   "emailChangedCheckInbox": "Die Anmelde-E-Mail wurde geändert. Überprüfen Sie Ihren Posteingang, um die neue E-Mail-Adresse zu bestätigen.",

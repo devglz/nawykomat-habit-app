@@ -104,6 +104,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "darkModeSubtitle": MessageLookupByLibrary.simpleMessage(
             "Cambiar el esquema de colores de la app"),
         "december": MessageLookupByLibrary.simpleMessage("Diciembre"),
+        "defaultSize":
+            MessageLookupByLibrary.simpleMessage("Tamaño predeterminado"),
         "deleteAccount":
             MessageLookupByLibrary.simpleMessage("Eliminar Cuenta"),
         "deleteAccountConfirmation": MessageLookupByLibrary.simpleMessage(

@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.habit_app">
    <application
-        android:label="habit_app"
-        android:name="${applicationName}"
+        android:label="Nawykomat"
+        android:name="Nawykomat"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

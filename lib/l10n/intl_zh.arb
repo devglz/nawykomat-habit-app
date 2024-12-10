@@ -18,6 +18,7 @@
     "emailAlreadyInUse": "邮箱地址已被使用。",
     "unknownError": "发生未知错误：{errorMessage}",
     "error": "错误",
+    "defaultSize": "默认大小",
     "changePassword": "更改密码",
     "enterNewPasswordTwice": "请两次输入新的密码以进行更改。",
     "newPassword": "新密码",

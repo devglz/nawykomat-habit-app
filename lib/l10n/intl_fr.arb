@@ -18,6 +18,7 @@
     "emailAlreadyInUse": "L'adresse e-mail est déjà utilisée.",
     "unknownError": "Une erreur inconnue s'est produite : {errorMessage}",
     "error": "Erreur",
+    "defaultSize": "Taille par défaut",
     "changePassword": "Changer le Mot de Passe",
     "enterNewPasswordTwice": "Entrez le nouveau mot de passe deux fois pour le modifier.",
     "newPassword": "Nouveau Mot de Passe",

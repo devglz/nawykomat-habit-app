@@ -18,6 +18,7 @@
     "emailAlreadyInUse": "La dirección de correo electrónico ya está en uso.",
     "unknownError": "Ocurrió un error desconocido: {errorMessage}",
     "error": "Error",
+    "defaultSize": "Tamaño predeterminado",
     "changePassword": "Cambiar Contraseña",
     "enterNewPasswordTwice": "Ingrese la nueva contraseña dos veces para cambiarla.",
     "newPassword": "Nueva Contraseña",

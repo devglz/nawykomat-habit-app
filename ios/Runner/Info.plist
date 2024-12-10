@@ -30,9 +30,6 @@
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<key>UIBackgroundModes</key>
-<array>
-    <string>audio</string>
-</array>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>

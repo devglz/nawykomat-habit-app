@@ -84,6 +84,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "darkMode": MessageLookupByLibrary.simpleMessage("深色模式"),
         "darkModeSubtitle": MessageLookupByLibrary.simpleMessage("更改应用的配色方案"),
         "december": MessageLookupByLibrary.simpleMessage("十二月"),
+        "defaultSize": MessageLookupByLibrary.simpleMessage("默认大小"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("删除账户"),
         "deleteAccountConfirmation":
             MessageLookupByLibrary.simpleMessage("您确定要删除您的账户吗？"),

@@ -141,6 +141,13 @@ class MyAppState extends State<MyApp> {
           debugPrint('Brak koloru w bazie danych, używam domyślnego koloru');
           setThemeColor(const Color(0xFF6750A4));
         }
+      } on FirebaseException catch (e) {
+        if (e.code == 'ERROR_INVALID_CREDENTIAL') {
+          debugPrint('Wystąpił wyjątek: Nieprawidłowe dane uwierzytelniające. Podane dane są niepoprawne, uszkodzone lub wygasły.');
+        } else {
+          debugPrint('Wystąpił wyjątek: ${e.message}');
+        }
+        setThemeColor(const Color(0xFF6750A4));
       } catch (e) {
         debugPrint('Błąd podczas inicjalizacji motywu: $e');
         setThemeColor(const Color(0xFF6750A4));

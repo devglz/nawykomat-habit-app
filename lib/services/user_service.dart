@@ -103,7 +103,7 @@ class UserService {
       print('Ponowne logowanie zakończone sukcesem.');
     } on FirebaseAuthException catch (e) {
       print('Błąd ponownego logowania: ${e.code} - ${e.message}');
-      throw e;
+      rethrow;
     }
   }
 
