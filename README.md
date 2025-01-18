@@ -1,6 +1,6 @@
 # Nawykomat
 
-![Nawykomat](nawykomat-habit-app/assets/screens/welcome_screen.png)
+![Web and App Overview Screen](assets/screens/web_and_app_overview_screen.png)
 
 ## Table of Contents
 1. [Project Overview](#project-overview)
@@ -196,25 +196,26 @@ Main folder containing all the application's code:
 ## Screenshots
 
 ### Welcome Screens
-![Welcome Screen](nawykomat-habit-app/assets/screens/welcome_screen.png)
+![Welcome Screen](assets/screens/welcome_screen.png)
 
 ### Login and Registration
-![Login and Register Screen](nawykomat-habit-app/assets/screens/login_and_register_screen.png)
+![Login and Register Screen](assets/screens/login_and_register_screen.png)
 
 ### Habit Management
-![Habit Management Screen](nawykomat-habit-app/assets/screens/habit_management_screen.png)
+![Habit Management Screen](assets/screens/habit_management_screen.png)
 
 ### Guides
-![Guides Screen](nawykomat-habit-app/assets/screens/guides_screen.png)
+![Guides Screen](assets/screens/guides_screen.png)
 
 ### Statistics
-![Statistics Screen](nawykomat-habit-app/assets/screens/statistics_screen.png)
+![Statistics Screen](assets/screens/statistics_screen.png)
 
 ### Notifications and Settings
-![General Settings Screen](nawykomat-habit-app/assets/screens/general_settings_screen.png)
+![General Settings Screen](assets/screens/general_settings_screen.png)
 
 ### Web and App Overview
-![Web and App Overview Screen](nawykomat-habit-app/assets/screens/web_and_app_overview_screen.png)
+![Web and App Overview Screen](assets/screens/web_and_app_overview_screen.png)
+
 
 ### Language Selection
 
@@ -226,7 +227,7 @@ Main folder containing all the application's code:
   - Spanish  
   - French  
   - Chinese  
-![Language Selection Screen](nawykomat-habit-app/assets/screens/language_selection_screen.png)
+![Language Selection Screen](assets/screens/language_selection_screen.png)
 
 
 ---
