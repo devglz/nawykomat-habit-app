@@ -18,6 +18,7 @@ import 'package:habit_app/services/habit_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:habit_app/l10n/l10n.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:habit_app/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,10 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
+
+  // Inicjalizacja NotificationService
+  final notificationService = NotificationService();
+  await notificationService.initialize();
 
   runApp(
     MultiProvider(
@@ -368,5 +373,4 @@ Future<void> _initializeFontSize() async {
     );
   }
 }
-
 
