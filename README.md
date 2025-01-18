@@ -1,5 +1,6 @@
 # Nawykomat
 
+![Nawykomat](nawykomat-habit-app/assets/screens/welcome_screen.png)
 
 ## Table of Contents
 1. [Project Overview](#project-overview)
@@ -11,9 +12,10 @@
 7. [Key Features](#key-features)
 8. [Statistics and Analysis](#statistics-and-analysis)
 9. [Data Flow](#data-flow)
-10. [Screenshots](#screenshots)
-11. [Future Enhancements](#future-enhancements)
-12. [Conclusion](#conclusion)
+10. [Code Structure](#code-structure)
+11. [Screenshots](#screenshots)
+12. [Future Enhancements](#future-enhancements)
+13. [Conclusion](#conclusion)
 
 ---
 
@@ -138,33 +140,94 @@ Nawykomat is a multi-platform habit management application designed for Android,
 
 ---
 
+## Code Structure
+
+The project is organized into a logical and modular folder structure:
+
+### `lib/`
+Main folder containing all the application's code:
+
+- **`l10n/`**  
+  Handles localization (multi-language support).  
+  - `intl_xx.arb`: Language-specific translation files (e.g., `intl_en.arb`, `intl_pl.arb`).
+  - `messages_xx.dart`: Generated files for language mappings.
+  - `l10n.dart`: Initialization of localization settings.
+
+- **`providers/`**  
+  Contains state management-related code:
+  - `theme_provider.dart`: Manages themes (e.g., light/dark mode).
+
+- **`services/`**  
+  Backend-related logic:
+  - `auth_service.dart`: User authentication logic.
+  - `habit_service.dart`: Habit tracking logic.
+  - `notification_service.dart`: Push notification handling.
+  - `user_service.dart`: User-related operations.
+
+- **`ui/`**  
+  User interface components organized by screens:
+  - **`habit/`**  
+    - `add_habit_page.dart`: Screen for adding habits.
+    - `edit_habit_page.dart`: Screen for editing habits.
+    - `habit_page.dart`: Main habit list page.
+  - **`home/`**  
+    - `home_page.dart`: Homepage screen.
+  - **`login/`**  
+    - `login_page.dart`: Login screen.
+  - **`settings/`**  
+    - `settings_page.dart`: Main settings screen.
+    - `profile_page.dart`: User profile settings.
+    - `notifications_page.dart`: Notification preferences.
+    - `personalization_page.dart` & `more_personalization_page.dart`: Personalization settings.
+  - **`widgets/`**  
+    - Reusable components like `custom_bottom_navigation_bar.dart`.
+
+- **`utils/`**  
+  Contains helper and configuration files:
+  - `constants.dart`: Global constants for the app.
+  - `labels.dart`: Static labels and text.
+
+- **Other files:**
+  - `main.dart`: Application entry point.
+  - `firebase_options.dart`: Firebase configuration file.
+
+---
+
 ## Screenshots
+
 ### Welcome Screens
+![Welcome Screen](nawykomat-habit-app/assets/screens/welcome_screen.png)
 
 ### Login and Registration
-![Login Screen](https://via.placeholder.com/800x400?text=Login+Screen)
-![Registration Screen](https://via.placeholder.com/800x400?text=Registration+Screen)
+![Login and Register Screen](nawykomat-habit-app/assets/screens/login_and_register_screen.png)
 
 ### Habit Management
-![Habit Management Screen](https://via.placeholder.com/800x400?text=Habit+Management+Screen)
-![Add/Edit Habits Screen](https://via.placeholder.com/800x400?text=Add+Habits+Screen)
+![Habit Management Screen](nawykomat-habit-app/assets/screens/habit_management_screen.png)
 
-### Notifications and Settings
-![Notification Settings Screen](https://via.placeholder.com/800x400?text=Notification+Settings+Screen)
-![General Settings Screen](https://via.placeholder.com/800x400?text=General+Settings+Screen)
-
-### Customization Options
-![Dark Mode Screen](https://via.placeholder.com/800x400?text=Dark+Mode+Screen)
-![Language Selection Screen](https://via.placeholder.com/800x400?text=Language+Selection+Screen)
+### Guides
+![Guides Screen](nawykomat-habit-app/assets/screens/guides_screen.png)
 
 ### Statistics
-![Daily Statistics Screen](https://via.placeholder.com/800x400?text=Daily+Statistics+Screen)
-![Weekly Statistics Screen](https://via.placeholder.com/800x400?text=Weekly+Statistics+Screen)
-![Monthly Reports Screen](https://via.placeholder.com/800x400?text=Monthly+Reports+Screen)
+![Statistics Screen](nawykomat-habit-app/assets/screens/statistics_screen.png)
 
-### Web Version
-![Web Version Screen 1](https://via.placeholder.com/800x400?text=Web+Version+Screen+1)
-![Web Version Screen 2](https://via.placeholder.com/800x400?text=Web+Version+Screen+2)
+### Notifications and Settings
+![General Settings Screen](nawykomat-habit-app/assets/screens/general_settings_screen.png)
+
+### Web and App Overview
+![Web and App Overview Screen](nawykomat-habit-app/assets/screens/web_and_app_overview_screen.png)
+
+### Language Selection
+
+- **Language Selection Screen**: Allows users to easily change the app's language according to their preferences.  
+  Supported languages include:  
+  - English  
+  - Polish  
+  - German  
+  - Spanish  
+  - French  
+  - Chinese  
+![Language Selection Screen](nawykomat-habit-app/assets/screens/language_selection_screen.png)
+
 
 ---
 
@@ -183,7 +246,6 @@ Nawykomat is an innovative tool for personal growth, blending cutting-edge techn
 
 ## Authors
 **Adam Głaz**  
-Supervisor: **Dr. Eng. Karol Suchenia**
 
 ---
 
